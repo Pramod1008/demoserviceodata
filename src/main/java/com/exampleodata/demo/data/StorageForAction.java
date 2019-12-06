@@ -11,17 +11,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 
+import com.exampleodata.demo.controller.EDMForAllForActionController;
 import com.exampleodata.demo.model.DemoEdmProviderForAllForAction;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Parameter;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmAction;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmKeyPropertyRef;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -29,6 +26,8 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class StorageForAction {
@@ -39,7 +38,7 @@ public class StorageForAction {
     public static final String ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT = "DiscountProduct";
     public static final String AMOUNT_PROPERTY = "Amount";
     public static final String PRICE_PROPERTY= "Price";
-
+    private static final Logger LOG = LoggerFactory.getLogger(StorageForAction.class);
     public StorageForAction() {
 
         productList = new ArrayList<Entity>();
@@ -90,7 +89,20 @@ public class StorageForAction {
             final EntityCollection resultCollection = new EntityCollection();
             resultCollection.getEntities().addAll(resultEntityList);
             return resultCollection;
-        } else {
+        }else if(DemoEdmProviderForAllForAction.FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT.equals(uriResourceFunction.getFunctionImport().getName())) {
+            final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
+            try
+            {
+                for(final Entity price:productList){
+                    LOG.info("PriceList",price);
+                }
+            }catch (Exception e){
+                throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
+            }
+            return null;
+        }
+
+        else {
             throw new ODataApplicationException("Function not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                     Locale.ROOT);
         }
@@ -424,5 +436,46 @@ public class StorageForAction {
             }
         }
         return null;
+    }
+
+
+    public EntityCollection getBoundFunctionEntityCollection(EdmFunction function, Integer amount) {
+        EntityCollection collection = new EntityCollection();
+        if ("GetDiscountProducts".equals(function.getName())) {
+            for (Entity entity : categoryList) {
+                    Entity en = getRelatedEntity(entity, (EdmEntityType) function.getReturnType().getType());
+                if(en!=null) {
+                    if (amount >= (Integer) en.getProperty("Price").getValue()) {
+                        collection.getEntities().add(en);
+                    }
+                }
+                //LOG.info(entity.toString()+" "+entity.getProperty("Price")+" type "+entity.getProperty("Price").getType());
+            }
+        }
+        return collection;
+    }
+
+    public Entity getBoundFunctionEntity(EdmFunction function, Integer amount,List<UriParameter> keyParams) throws ODataApplicationException {
+        if ("GetDiscountProduct".equals(function.getName())) {
+            for (Entity entity : categoryList) {
+                //if(amount== entity.getProperty("amount").asCollection().size()){
+                    return getRelatedEntity(entity, (EdmEntityType) function.getReturnType().getType(), keyParams);
+                //}
+                //LOG.info(entity.toString());
+            }
+        }
+        return null;
+    }
+
+    private boolean isKey(EdmEntityType edmEntityType, String propertyName) {
+
+        List<EdmKeyPropertyRef> keyPropertyRefs = edmEntityType.getKeyPropertyRefs();
+        for (EdmKeyPropertyRef propRef : keyPropertyRefs) {
+            String keyPropertyName = propRef.getName();
+            if (keyPropertyName.equals(propertyName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -164,10 +164,8 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
     @Override
     public List<CsdlFunction> getFunctions(final FullQualifiedName functionName) {
+        final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
         if (functionName.equals(FUNCTION_COUNT_CATEGORIES_FQN)) {
-            // It is allowed to overload functions, so we have to provide a list of functions for each function name
-            final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-
             // Create the parameter for the function
             final CsdlParameter parameterAmount = new CsdlParameter();
             parameterAmount.setName(PARAMETER_AMOUNT);
@@ -188,14 +186,11 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
             return functions;
         } else if (functionName.equals(FUNCTION_PROVIDE_DISCOUNT_FQN)) {
-
-            final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-
             // Create the parameter for the function
             final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
             CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_BIND);
-            parameter.setNullable(false);
+            parameter.setName(PARAMETER_CATEGORY);
+            //parameter.setNullable(false);
             parameter.setType(ET_CATEGORY_FQN);
             parameter.setCollection(true);
             parameters.add(parameter);
@@ -218,14 +213,11 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
             return functions;
 
         } else if (functionName.equals(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)) {
-
-            final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-
             // Create the parameter for the function
             final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
             CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_BIND);
-            parameter.setNullable(false);
+            parameter.setName(PARAMETER_CATEGORY);
+            //parameter.setNullable(false);
             parameter.setType(ET_CATEGORY_FQN);
             parameters.add(parameter);
             parameter = new CsdlParameter();
@@ -259,6 +251,18 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                         .setName(functionImportName)
                         .setFunction(FUNCTION_COUNT_CATEGORIES_FQN)
                         .setEntitySet(ES_CATEGORIES_NAME)
+                        .setIncludeInServiceDocument(true);
+            }else if(functionImportName.equals(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN.getName())){
+                return new CsdlFunctionImport()
+                        .setName(functionImportName)
+                        .setFunction(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)
+                        .setEntitySet(ES_PRODUCTS_NAME)
+                        .setIncludeInServiceDocument(true);
+            }else if(functionImportName.equals(FUNCTION_PROVIDE_DISCOUNT_FQN.getName())){
+                return new CsdlFunctionImport()
+                        .setName(functionImportName)
+                        .setFunction(FUNCTION_PROVIDE_DISCOUNT_FQN)
+                        .setEntitySet(ES_PRODUCTS_NAME)
                         .setIncludeInServiceDocument(true);
             }
         }
@@ -416,6 +420,8 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         // Create function imports
         List<CsdlFunctionImport> functionImports = new ArrayList<CsdlFunctionImport>();
         functionImports.add(getFunctionImport(CONTAINER, FUNCTION_COUNT_CATEGORIES));
+        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_PROVIDE_DISCOUNT));
+        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT));
 
         // Create action imports
         List<CsdlActionImport> actionImports = new ArrayList<CsdlActionImport>();

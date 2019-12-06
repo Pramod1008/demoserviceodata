@@ -186,7 +186,12 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
                         .getAction();
                 throw new ODataApplicationException("Action " + action.getName() + " is not yet implemented.",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
-            } else {
+            }else if (resourcePaths.get(1) instanceof UriResourceAction) {
+                action = ((UriResourceAction) resourcePaths.get(1))
+                        .getAction();
+                throw new ODataApplicationException("Action " + action.getName() + " is not yet implemented.",
+                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
+            }else {
                 action = ((UriResourceAction) resourcePaths.get(1))
                         .getAction();
                 parameters = deserializer.actionParameters(request.getBody(), action)

@@ -24,4 +24,5 @@ public class DemoEntityActionResult {
         return this;
     }
 
+
 }

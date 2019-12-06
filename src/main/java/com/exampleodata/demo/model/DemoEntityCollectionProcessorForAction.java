@@ -1,6 +1,8 @@
 package com.exampleodata.demo.model;
 
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,15 +27,10 @@ import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriParameter;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.api.uri.UriResourceFunction;
-import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
-import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
-import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.api.uri.*;
+import org.apache.olingo.server.api.uri.queryoption.*;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.core.uri.UriResourceSingletonImpl;
 
 
@@ -80,17 +77,15 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
 
     private void readExpand( ExpandOption expandOption, UriInfo uriInfo) throws ODataApplicationException  {
 
-        // 1st retrieve the requested EdmEntitySet from the uriInfo
+
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        // in our example, the first segment is the EntitySet
+
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
         EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
-        // 2nd: fetch the data from backend for this requested EntitySetName
+
         EntityCollection entityCollection = storage.readEntitySetData(edmEntitySet);
 
-        // retrieve the EdmNavigationProperty from the expand expression
-        // Note: in our example, we have only one NavigationProperty, so we can directly access it
         EdmNavigationProperty edmNavigationProperty = null;
         ExpandItem expandItem = expandOption.getExpandItems().get(0);
         if(expandItem.isStar()) {
@@ -107,16 +102,14 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
                 }
             }
         } else {
-            // can be 'Category' or 'Products', no path supported
+
             UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
-            // we don't need to handle error cases, as it is done in the Olingo library
+
             if(uriResource instanceof UriResourceNavigation) {
                 edmNavigationProperty = ((UriResourceNavigation) uriResource).getProperty();
             }
         }
 
-        // can be 'Category' or 'Products', no path supported
-        // we don't need to handle error cases, as it is done in the Olingo library
         if(edmNavigationProperty != null) {
             String navPropName = edmNavigationProperty.getName();
             EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
@@ -128,14 +121,11 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
                 link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
                 link.setRel(Constants.NS_ASSOCIATION_LINK_REL + navPropName);
 
-                if (edmNavigationProperty.isCollection()) { // in case of Categories/$expand=Products
-                    // fetch the data for the $expand (to-many navigation) from backend
+                if (edmNavigationProperty.isCollection()) {
                     EntityCollection expandEntityCollection = storage.getRelatedEntityCollection(entity, expandEdmEntityType);
                     link.setInlineEntitySet(expandEntityCollection);
                     link.setHref(expandEntityCollection.getId().toASCIIString());
-                } else { // in case of Products?$expand=Category
-                    // fetch the data for the $expand (to-one navigation) from backend
-                    // here we get the data for the expand
+                } else {
                     Entity expandEntity = storage.getRelatedEntity(entity, expandEdmEntityType);
                     link.setInlineEntity(expandEntity);
                     link.setHref(expandEntity.getId().toASCIIString());
@@ -150,8 +140,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
     private void readFunctionImportCollection(final ODataRequest request, final ODataResponse response,
                                               final UriInfo uriInfo, final ContentType responseFormat) throws ODataApplicationException, SerializerException {
 
-        // 1st step: Analyze the URI and fetch the entity collection returned by the function import
-        // Function Imports are always the first segment of the resource path
+
         final UriResource firstSegment = uriInfo.getUriResourceParts().get(0);
 
         if(!(firstSegment instanceof UriResourceFunction)) {
@@ -162,7 +151,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
         final UriResourceFunction uriResourceFunction = (UriResourceFunction) firstSegment;
         final EntityCollection entityCol = storage.readFunctionImportCollection(uriResourceFunction, serviceMetadata);
 
-        // 2nd step: Serialize the response entity
+
         final EdmEntityType edmEntityType = (EdmEntityType) uriResourceFunction.getFunction().getReturnType().getType();
         final ContextURL contextURL = ContextURL.with().asCollection().type(edmEntityType).build();
         EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().contextURL(contextURL).build();
@@ -170,7 +159,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
         final SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, entityCol,
                 opts);
 
-        // 3rd configure the response object
+
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
@@ -242,14 +231,94 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
                     throw new ODataApplicationException("Entity not found.",
                             HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
                 }
-
+                EdmFunction edmFunction=uriResourceFunction.getFunction();
+                Integer amount = Integer.parseInt(uriResourceFunction.getParameters().get(0).getText());
                 // then fetch the entity collection for the target type
-                responseEntityCollection = storage.readEntitySetData(targetEntityType);
+               // responseEntityCollection = storage.readEntitySetData(targetEntityType);
+                responseEntityCollection = storage.getBoundFunctionEntityCollection(edmFunction,amount);
             }
         } else { // this would be the case for e.g. Products(1)/Category/Products
             throw new ODataApplicationException("Not supported",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
         }
+
+        List<Entity> entityList = responseEntityCollection.getEntities();
+        EntityCollection returnEntityCollection = new EntityCollection();
+
+        // handle $top
+        TopOption topOption = uriInfo.getTopOption();
+        if (topOption != null) {
+            int topNumber = topOption.getValue();
+            if (topNumber >= 0) {
+                if(topNumber <= entityList.size()) {
+                    entityList = entityList.subList(0, topNumber);
+                }  // else the client has requested more entities than available => return what we have
+            } else {
+                throw new ODataApplicationException("Invalid value for $top", HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                        Locale.ROOT);
+            }
+        }
+
+        // after applying the system query options, create the EntityCollection based on the reduced list
+        for (Entity entity : entityList) {
+            returnEntityCollection.getEntities().add(entity);
+        }
+
+        CountOption countOption = uriInfo.getCountOption();
+        if (countOption != null) {
+            boolean isCount = countOption.getValue();
+            if(isCount){
+                returnEntityCollection.setCount(entityList.size());
+            }
+        }
+
+        List<Entity> entityList1 = returnEntityCollection.getEntities();
+
+
+        // 3rd apply $orderby
+        OrderByOption orderByOption = uriInfo.getOrderByOption();
+        if (orderByOption != null) {
+            List<OrderByItem> orderItemList = orderByOption.getOrders();
+            final OrderByItem orderByItem = orderItemList.get(0); // in our example we support only one
+            Expression expression = orderByItem.getExpression();
+            if(expression instanceof Member){
+                UriInfoResource resourcePath = ((Member)expression).getResourcePath();
+                UriResource uriResource1 = resourcePath.getUriResourceParts().get(0);
+                if (uriResource1 instanceof UriResourcePrimitiveProperty) {
+                    EdmProperty edmProperty = ((UriResourcePrimitiveProperty)uriResource1).getProperty();
+                    final String sortPropertyName = edmProperty.getName();
+
+                    // do the sorting for the list of entities
+                    Collections.sort(entityList1, new Comparator<Entity>() {
+
+                        // we delegate the sorting to the native sorter of Integer and String
+                        public int compare(Entity entity1, Entity entity2) {
+                            int compareResult = 0;
+
+                            if(sortPropertyName.equals("ID") || sortPropertyName.equals("Price")  ){
+                                Integer integer1 = (Integer) entity1.getProperty(sortPropertyName).getValue();
+                                Integer integer2 = (Integer) entity2.getProperty(sortPropertyName).getValue();
+
+                                compareResult = integer1.compareTo(integer2);
+                            }else{
+                                String propertyValue1 = (String) entity1.getProperty(sortPropertyName).getValue();
+                                String propertyValue2 = (String) entity2.getProperty(sortPropertyName).getValue();
+
+                                compareResult = propertyValue1.compareTo(propertyValue2);
+                            }
+
+                            // if 'desc' is specified in the URI, change the order of the list
+                            if(orderByItem.isDescending()){
+                                return - compareResult; // just convert the result to negative value to change the order
+                            }
+
+                            return compareResult;
+                        }
+                    });
+                }
+            }
+        }
+
 
         EdmEntityType edmEntityType = responseEdmEntitySet.getEntityType();
         SelectOption selectOption = uriInfo.getSelectOption();
@@ -266,11 +335,12 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
                 .select(selectOption)
                 .expand(expandOption)
                 .id(id)
+                .count(countOption)
                 .build();
 
         ODataSerializer serializer = odata.createSerializer(responseFormat);
         SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType,
-                responseEntityCollection, opts);
+                returnEntityCollection, opts);
 
         // 4th: configure the response object: set the body, headers and status code
         response.setContent(serializerResult.getContent());

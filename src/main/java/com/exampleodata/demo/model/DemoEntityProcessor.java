@@ -30,9 +30,7 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
-import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
-import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.api.uri.queryoption.*;
 ;
 
 public class DemoEntityProcessor implements EntityProcessor {
@@ -260,9 +258,12 @@ public class DemoEntityProcessor implements EntityProcessor {
                     throw new ODataApplicationException("Entity not found.",
                             HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
                 }
-
+                Integer amount = Integer.parseInt(uriResourceFunction.getParameters().get(0).getText());
+                EdmFunction edmFunction=  uriResourceFunction.getFunction();
+                List<UriParameter> funKeyPredicates = uriResourceEntitySet.getKeyPredicates();
                 // then fetch the entity collection for the target type
-                responseEntity = storage.readEntityData(targetEntityType);
+                //responseEntity = storage.getBoundFunctionEntity(targetEntityType,amount);
+                responseEntity = storage.getBoundFunctionEntity(edmFunction,amount,funKeyPredicates);
             }
         } else {
             // this would be the case for e.g. Products(1)/Category/Products(1)/Category
