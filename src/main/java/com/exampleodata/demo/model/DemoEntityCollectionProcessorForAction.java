@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import com.exampleodata.demo.data.CustomFunction;
 import com.exampleodata.demo.data.StorageForAction;
 import com.exampleodata.demo.data.UtilForAction;
 import org.apache.olingo.commons.api.Constants;
@@ -41,6 +42,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
     private ServiceMetadata serviceMetadata;
     // our database-mock
     private StorageForAction storage;
+    private CustomFunction customFunction;
 
     public DemoEntityCollectionProcessorForAction(StorageForAction storage) {
         this.storage = storage;
@@ -258,13 +260,14 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
                         Locale.ROOT);
             }
         }
+        CountOption countOption = uriInfo.getCountOption();
 
         // after applying the system query options, create the EntityCollection based on the reduced list
-        for (Entity entity : entityList) {
-            returnEntityCollection.getEntities().add(entity);
-        }
-
-        CountOption countOption = uriInfo.getCountOption();
+        //if(countOption == null) {
+            for (Entity entity : entityList) {
+                returnEntityCollection.getEntities().add(entity);
+            }
+       // }
         if (countOption != null) {
             boolean isCount = countOption.getValue();
             if(isCount){
@@ -272,52 +275,52 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
             }
         }
 
-        List<Entity> entityList1 = returnEntityCollection.getEntities();
+            List<Entity> entityList1 = returnEntityCollection.getEntities();
 
 
-        // 3rd apply $orderby
-        OrderByOption orderByOption = uriInfo.getOrderByOption();
-        if (orderByOption != null) {
-            List<OrderByItem> orderItemList = orderByOption.getOrders();
-            final OrderByItem orderByItem = orderItemList.get(0); // in our example we support only one
-            Expression expression = orderByItem.getExpression();
-            if(expression instanceof Member){
-                UriInfoResource resourcePath = ((Member)expression).getResourcePath();
-                UriResource uriResource1 = resourcePath.getUriResourceParts().get(0);
-                if (uriResource1 instanceof UriResourcePrimitiveProperty) {
-                    EdmProperty edmProperty = ((UriResourcePrimitiveProperty)uriResource1).getProperty();
-                    final String sortPropertyName = edmProperty.getName();
+            // 3rd apply $orderby
+            OrderByOption orderByOption = uriInfo.getOrderByOption();
+            if (orderByOption != null) {
+                List<OrderByItem> orderItemList = orderByOption.getOrders();
+                final OrderByItem orderByItem = orderItemList.get(0); // in our example we support only one
+                Expression expression = orderByItem.getExpression();
+                if (expression instanceof Member) {
+                    UriInfoResource resourcePath = ((Member) expression).getResourcePath();
+                    UriResource uriResource1 = resourcePath.getUriResourceParts().get(0);
+                    if (uriResource1 instanceof UriResourcePrimitiveProperty) {
+                        EdmProperty edmProperty = ((UriResourcePrimitiveProperty) uriResource1).getProperty();
+                        final String sortPropertyName = edmProperty.getName();
 
-                    // do the sorting for the list of entities
-                    Collections.sort(entityList1, new Comparator<Entity>() {
+                        // do the sorting for the list of entities
+                        Collections.sort(entityList1, new Comparator<Entity>() {
 
-                        // we delegate the sorting to the native sorter of Integer and String
-                        public int compare(Entity entity1, Entity entity2) {
-                            int compareResult = 0;
+                            // we delegate the sorting to the native sorter of Integer and String
+                            public int compare(Entity entity1, Entity entity2) {
+                                int compareResult = 0;
 
-                            if(sortPropertyName.equals("ID") || sortPropertyName.equals("Price")  ){
-                                Integer integer1 = (Integer) entity1.getProperty(sortPropertyName).getValue();
-                                Integer integer2 = (Integer) entity2.getProperty(sortPropertyName).getValue();
+                                if (sortPropertyName.equals("ID") || sortPropertyName.equals("Price")) {
+                                    Integer integer1 = (Integer) entity1.getProperty(sortPropertyName).getValue();
+                                    Integer integer2 = (Integer) entity2.getProperty(sortPropertyName).getValue();
 
-                                compareResult = integer1.compareTo(integer2);
-                            }else{
-                                String propertyValue1 = (String) entity1.getProperty(sortPropertyName).getValue();
-                                String propertyValue2 = (String) entity2.getProperty(sortPropertyName).getValue();
+                                    compareResult = integer1.compareTo(integer2);
+                                } else {
+                                    String propertyValue1 = (String) entity1.getProperty(sortPropertyName).getValue();
+                                    String propertyValue2 = (String) entity2.getProperty(sortPropertyName).getValue();
 
-                                compareResult = propertyValue1.compareTo(propertyValue2);
+                                    compareResult = propertyValue1.compareTo(propertyValue2);
+                                }
+
+                                // if 'desc' is specified in the URI, change the order of the list
+                                if (orderByItem.isDescending()) {
+                                    return -compareResult; // just convert the result to negative value to change the order
+                                }
+
+                                return compareResult;
                             }
-
-                            // if 'desc' is specified in the URI, change the order of the list
-                            if(orderByItem.isDescending()){
-                                return - compareResult; // just convert the result to negative value to change the order
-                            }
-
-                            return compareResult;
-                        }
-                    });
+                        });
+                    }
                 }
             }
-        }
 
 
         EdmEntityType edmEntityType = responseEdmEntitySet.getEntityType();

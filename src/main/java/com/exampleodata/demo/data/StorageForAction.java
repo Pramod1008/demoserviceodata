@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 
-import com.exampleodata.demo.controller.EDMForAllForActionController;
 import com.exampleodata.demo.model.DemoEdmProviderForAllForAction;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -20,7 +19,6 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
-import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -44,8 +42,8 @@ public class StorageForAction {
         productList = new ArrayList<Entity>();
         categoryList = new ArrayList<Entity>();
 
-        initProductSampleData();
-        initCategorySampleData();
+        //initProductSampleData();
+        //initCategorySampleData();
     }
 
     /* PUBLIC FACADE */
@@ -64,27 +62,9 @@ public class StorageForAction {
                                                          final ServiceMetadata serviceMetadata) throws ODataApplicationException {
 
         if(DemoEdmProviderForAllForAction.FUNCTION_COUNT_CATEGORIES.equals(uriResourceFunction.getFunctionImport().getName())) {
-            // Get the parameter of the function
-            final UriParameter parameterAmount = uriResourceFunction.getParameters().get(0);
-            // Try to convert the parameter to an Integer.
-            // We have to take care, that the type of parameter fits to its EDM declaration
-            int amount;
-            try {
-                amount = Integer.parseInt(parameterAmount.getText());
-            } catch(NumberFormatException e) {
-                throw new ODataApplicationException("Type of parameter Amount must be Edm.Int32", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
-            }
-
-            final EdmEntityType productEntityType = serviceMetadata.getEdm().getEntityType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN);
             final List<Entity> resultEntityList = new ArrayList<Entity>();
-
-            // Loop over all categories and check how many products are linked
-            for(final Entity category : categoryList) {
-                final EntityCollection products = getRelatedEntityCollection(category, productEntityType);
-                if(products.getEntities().size() == amount) {
-                    resultEntityList.add(category);
-                }
-            }
+            Entity entity=getCategoryCount();
+            resultEntityList.add(entity);
 
             final EntityCollection resultCollection = new EntityCollection();
             resultCollection.getEntities().addAll(resultEntityList);
@@ -100,12 +80,81 @@ public class StorageForAction {
                 throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
             }
             return null;
-        }
-
-        else {
+        }else if(DemoEdmProviderForAllForAction.FUNCTION_GET_ALL_PRODUCTS.equals(uriResourceFunction.getFunctionImport().getName())) {
+           // final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
+            try
+            {
+                // EntityCollection entityCollectionget=AllProducts();
+//                EntityCollection entityCollection = readEntitySetData(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME);
+//                return entityCollection;
+                String query="SELECT * FROM studentapplication.product";
+                EntityCollection entityCollectionget=AllProducts(query);
+                return  entityCollectionget;
+            }catch (Exception e){
+                throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
+            }
+        } else if(DemoEdmProviderForAllForAction.FUNCTION_GET_TOP_PRODUCTS.equals(uriResourceFunction.getFunctionImport().getName())) {
+            // final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
+            final UriParameter paramterTop=uriResourceFunction.getParameters().get(0);
+            int limit;
+            try
+            {
+                // EntityCollection entityCollectionget=AllProducts();
+//                EntityCollection entityCollection = readEntitySetData(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME);
+//                return entityCollection;
+                limit=Integer.parseInt(paramterTop.getText());
+                String query="SELECT * FROM studentapplication.product limit "+limit;
+                EntityCollection entityCollectionget=AllProducts(query);
+                return  entityCollectionget;
+            }catch (Exception e){
+                throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
+            }
+        }else {
             throw new ODataApplicationException("Function not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                     Locale.ROOT);
         }
+    }
+
+    private Entity getCategoryCount() {
+        //EntityCollection getCountEntityCollection = new EntityCollection();
+        // Sql Connection
+        try
+        {
+            // create our mysql database connection
+            String myDriver ="com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://localhost:3306/studentapplication";
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, "root", "root");
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "Select Count(*) as CategoryCount from category";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+
+                int CategoryCount = rs.getInt("CategoryCount");
+
+                Entity entity = new Entity();
+                entity.addProperty(new Property(null,"CategoryCount",ValueType.PRIMITIVE,CategoryCount));
+                return entity;
+            }
+            st.close();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+        }
+        return null;
+        //End Connection
     }
 
     public void resetDataSet() {
@@ -134,6 +183,7 @@ public class StorageForAction {
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) throws ODataApplicationException {
 
         if (edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME)) {
+            productList=initProductSampleData();
             return getEntityCollection(productList);
         } else if(edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME)) {
             return getEntityCollection(categoryList);
@@ -145,6 +195,7 @@ public class StorageForAction {
     public EntityCollection readEntitySetData(String edmEntityTypeName) throws ODataApplicationException {
 
         if (edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME)) {
+            productList=initProductSampleData();
             return getEntityCollection(productList);
         } else if(edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_NAME)) {
             return getEntityCollection(categoryList);
@@ -274,8 +325,66 @@ public class StorageForAction {
         return false;
     }
 
+    private List<Entity> initProductSampleData(String query) {
 
-       private void initProductSampleData() {
+
+        // Sql Connection
+        try
+        {
+            // create our mysql database connection
+            String myDriver ="com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://localhost:3306/studentapplication";
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, "root", "root");
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+           // String query = "SELECT * FROM studentapplication.product";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+
+                String Name = rs.getString("Name");
+                String Description = rs.getString("Description");
+                int Price = rs.getInt("Price");
+                int Id = rs.getInt("ID");
+
+                Entity entity = new Entity();
+
+                entity.addProperty(new Property(null, "ID", ValueType.PRIMITIVE,Id));
+                entity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, Name));
+                entity.addProperty(new Property(null, "Description", ValueType.PRIMITIVE, Description));
+                entity.addProperty(new Property(null,"Price",ValueType.PRIMITIVE,Price));
+
+
+                entity.setType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString());
+                entity.setId(createId(entity, "ID"));
+
+                productList.add(entity);
+
+            }
+
+            st.close();
+            return productList;
+        }
+        catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+        }
+
+        //End Connection
+        return null;
+    }
+
+       private List<Entity> initProductSampleData() {
 
 
         // Sql Connection
@@ -318,8 +427,11 @@ public class StorageForAction {
                 entity.setId(createId(entity, "ID"));
 
                 productList.add(entity);
+
             }
+
             st.close();
+            return productList;
         }
         catch (Exception e)
         {
@@ -328,7 +440,10 @@ public class StorageForAction {
         }
 
         //End Connection
-    }
+           return null;
+       }
+
+
 
     private void initCategorySampleData() {
 
@@ -477,5 +592,14 @@ public class StorageForAction {
             }
         }
         return false;
+    }
+
+    public EntityCollection AllProducts(String query) {
+        if(!productList.isEmpty())
+        {
+            productList.clear();
+        }
+        productList=initProductSampleData(query);
+        return getEntityCollection(productList);
     }
 }

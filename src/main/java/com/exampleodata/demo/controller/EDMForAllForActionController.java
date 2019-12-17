@@ -34,6 +34,7 @@ public class EDMForAllForActionController {
     @ResponseBody
     public void process(HttpServletRequest request, HttpServletResponse response) {
         try{
+
             HttpSession session = request.getSession(true);
             StorageForAction storage = (StorageForAction) session.getAttribute(StorageForAction.class.getName());
             if (storage == null) {
