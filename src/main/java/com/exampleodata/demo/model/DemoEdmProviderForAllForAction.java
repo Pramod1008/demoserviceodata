@@ -82,18 +82,18 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public static final FullQualifiedName FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN = new FullQualifiedName(NAMESPACE, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT);
 
     //Get All Product Details
-    public static final String FUNCTION_GET_TOP_PRODUCTS = "GetTopProducts";
-    public static final FullQualifiedName FUNCTION_GET_TOP_PRODUCTS_FQN
-            = new FullQualifiedName(NAMESPACE, FUNCTION_GET_TOP_PRODUCTS);
+    public static final String FUNCTION_NAME = "GetTopProducts";
+    public static final FullQualifiedName FUNCTION_NAME_FQN
+            = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
 
     // Function Parameters
-    public static final String PARAMETER_AMOUNT = "Limit";
+    public static final String PARAMETER_AMOUNT = "limit ";
 
     //Query
     public static final String QUERY = "SELECT * FROM studentapplication.product ";
 
     //Return Type
-    public static final FullQualifiedName ET_RETURN_TYPE =ET_PRODUCT_FQN;
+    public static final FullQualifiedName SET_RETURN_TYPE =ET_PRODUCT_FQN;
 
     //set collection
     public static final boolean SET_COLLECTION=true;
@@ -210,23 +210,25 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
             functions.add(function);
 
             return functions;
-        } else if (functionName.equals(FUNCTION_GET_TOP_PRODUCTS_FQN)) {
+        } else if (functionName.equals(FUNCTION_NAME_FQN)) {
             // Create the parameter for the function
             final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_AMOUNT);
-            parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            parameters.add(parameter);
+            if(!PARAMETER_AMOUNT.trim().isEmpty()) {
 
+                CsdlParameter parameter = new CsdlParameter();
+                parameter.setName(PARAMETER_AMOUNT);
+                parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+                parameters.add(parameter);
+            }
             // Create the return type of the function
             final CsdlReturnType returnType = new CsdlReturnType();
-            returnType.setCollection(true).setType(ET_PRODUCT_FQN);
+            returnType.setCollection(SET_COLLECTION).setType(SET_RETURN_TYPE);
 
             // Create the function
             final CsdlFunction function = new CsdlFunction();
-            function.setName(FUNCTION_GET_TOP_PRODUCTS_FQN.getName())
+            function.setName(FUNCTION_NAME_FQN.getName())
                     .setParameters(parameters)
-                    .setBound(false).setReturnType(returnType);
+                    .setBound(SET_BOUND).setReturnType(returnType);
             functions.add(function);
 
             return functions;
@@ -291,10 +293,10 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                         .setFunction(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)
                         .setEntitySet(ES_PRODUCTS_NAME)
                         .setIncludeInServiceDocument(true);
-            }else if(functionImportName.equals(FUNCTION_GET_TOP_PRODUCTS_FQN.getName())){
+            }else if(functionImportName.equals(FUNCTION_NAME_FQN.getName())){
                 return new CsdlFunctionImport()
                         .setName(functionImportName)
-                        .setFunction(FUNCTION_GET_TOP_PRODUCTS_FQN)
+                        .setFunction(FUNCTION_NAME_FQN)
                         .setEntitySet(ES_PRODUCTS_NAME)
                         .setIncludeInServiceDocument(true);
             }else if(functionImportName.equals(FUNCTION_GET_PRODUCTS_FQN.getName())){
@@ -448,7 +450,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         // add functions
         List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
         functions.addAll(getFunctions(FUNCTION_COUNT_CATEGORIES_FQN));
-        functions.addAll(getFunctions(FUNCTION_GET_TOP_PRODUCTS_FQN));
+        functions.addAll(getFunctions(FUNCTION_NAME_FQN));
         functions.addAll(getFunctions(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN));
         functions.addAll(getFunctions(FUNCTION_GET_PRODUCTS_FQN));
 
@@ -473,7 +475,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         // Create function imports
         List<CsdlFunctionImport> functionImports = new ArrayList<CsdlFunctionImport>();
         functionImports.add(getFunctionImport(CONTAINER, FUNCTION_COUNT_CATEGORIES));
-        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_GET_TOP_PRODUCTS));
+        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_NAME));
         functionImports.add(getFunctionImport(CONTAINER, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT));
         functionImports.add(getFunctionImport(CONTAINER, FUNCTION_GET_ALL_PRODUCTS));
 

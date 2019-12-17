@@ -93,19 +93,21 @@ public class StorageForAction {
             }catch (Exception e){
                 throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
             }
-        } else if(DemoEdmProviderForAllForAction.FUNCTION_GET_TOP_PRODUCTS.equals(uriResourceFunction.getFunctionImport().getName())) {
-            // final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
-            final UriParameter paramterTop=uriResourceFunction.getParameters().get(0);
+        } else if(DemoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
+            String query=null;
             int limit;
             try
             {
-                // EntityCollection entityCollectionget=AllProducts();
-//                EntityCollection entityCollection = readEntitySetData(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME);
-//                return entityCollection;
-                limit=Integer.parseInt(paramterTop.getText());
-                String query="SELECT * FROM studentapplication.product limit "+limit;
+                if(uriResourceFunction.getParameters().size()==0){
+                    query=DemoEdmProviderForAllForAction.QUERY;
+                }else{
+                    final UriParameter parameterTop=uriResourceFunction.getParameters().get(0);
+                    limit=Integer.parseInt(parameterTop.getText());
+                    query=DemoEdmProviderForAllForAction.QUERY+" "+DemoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
+                }
                 EntityCollection entityCollectionget=AllProducts(query);
                 return  entityCollectionget;
+
             }catch (Exception e){
                 throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
             }
