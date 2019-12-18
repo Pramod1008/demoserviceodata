@@ -1,6 +1,7 @@
 package com.exampleodata.demo.model;
 
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.apache.olingo.server.api.uri.queryoption.*;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.core.uri.UriResourceSingletonImpl;
+import org.json.simple.parser.ParseException;
 
 
 public class DemoEntityCollectionProcessorForAction implements EntityCollectionProcessor {
@@ -68,8 +70,14 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
             }
             readEntityCollectionInternal(request, response, uriInfo, responseFormat);
        } else if(firstResourceSegment instanceof UriResourceFunction) {
-           readFunctionImportCollection(request, response, uriInfo, responseFormat);
-       }else {
+            try {
+                readFunctionImportCollection(request, response, uriInfo, responseFormat);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }else {
             throw new ODataApplicationException("Not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                     Locale.ENGLISH);
         }
@@ -140,7 +148,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
     }
 
     private void readFunctionImportCollection(final ODataRequest request, final ODataResponse response,
-                                              final UriInfo uriInfo, final ContentType responseFormat) throws ODataApplicationException, SerializerException {
+                                              final UriInfo uriInfo, final ContentType responseFormat) throws ODataApplicationException, SerializerException, IOException, ParseException {
 
 
         final UriResource firstSegment = uriInfo.getUriResourceParts().get(0);

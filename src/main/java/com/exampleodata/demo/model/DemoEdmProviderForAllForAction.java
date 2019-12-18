@@ -1,5 +1,7 @@
 package com.exampleodata.demo.model;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
         import java.util.Arrays;
         import java.util.List;
@@ -22,6 +24,9 @@ import java.util.ArrayList;
         import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
         import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
         import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /*
  * this class is supposed to declare the metadata of the OData service
@@ -29,6 +34,9 @@ import java.util.ArrayList;
  * e.g. http://localhost:8080/ExampleService1/ExampleService1.svc/$metadata
  */
 public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
+
+    JSONParser jsonParser=new JSONParser();
+    JSONObject jsonObject= (JSONObject) jsonParser.parse(new FileReader("E:\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\Example.json"));
 
     // Service Namespace
     public static final String NAMESPACE = "OData.Demo";
@@ -82,24 +90,24 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public static final FullQualifiedName FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN = new FullQualifiedName(NAMESPACE, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT);
 
     //Get All Product Details
-    public static final String FUNCTION_NAME = "GetTopProducts";
-    public static final FullQualifiedName FUNCTION_NAME_FQN
+    public final String FUNCTION_NAME =(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
+    public final FullQualifiedName FUNCTION_NAME_FQN
             = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
 
     // Function Parameters
-    public static final String PARAMETER_AMOUNT = "limit ";
+    public final String PARAMETER_AMOUNT = (String) jsonObject.get("PARAMETER_AMOUNT");//"limit ";
 
     //Query
-    public static final String QUERY = "SELECT * FROM studentapplication.product ";
+    public final String QUERY = (String) jsonObject.get("QUERY");//"SELECT * FROM studentapplication.product ";
 
     //Return Type
-    public static final FullQualifiedName SET_RETURN_TYPE =ET_PRODUCT_FQN;
+    public  final FullQualifiedName SET_RETURN_TYPE =new FullQualifiedName (NAMESPACE, (String) jsonObject.get("SET_RETURN_TYPE"));//ET_PRODUCT_FQN;
 
     //set collection
-    public static final boolean SET_COLLECTION=true;
+    public final boolean SET_COLLECTION=(boolean) jsonObject.get("SET_COLLECTION");//true;
 
     //set Bound
-    public static final boolean SET_BOUND=false;
+    public final boolean SET_BOUND=(boolean) jsonObject.get("SET_BOUND");//false;
 
     //Bound Action Binding Parameter
     public static final String PARAMETER_CATEGORY = "ParamCategory";
@@ -109,6 +117,9 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
     //get CategoryCount
     public static final String PARAMETER_GET_CATEGORY_COUNT ="CategoryCount";
+
+    public DemoEdmProviderForAllForAction() throws IOException, ParseException {
+    }
 
     @Override
     public List<CsdlAction> getActions(final FullQualifiedName actionName) {

@@ -6,7 +6,8 @@ import org.apache.olingo.commons.api.edmx.EdmxReference;
         import org.apache.olingo.server.api.OData;
         import org.apache.olingo.server.api.ODataHttpHandler;
         import org.apache.olingo.server.api.ServiceMetadata;
-        import org.slf4j.Logger;
+import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
         import org.slf4j.LoggerFactory;
         import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
         import javax.servlet.http.HttpServletRequestWrapper;
         import javax.servlet.http.HttpServletResponse;
         import javax.servlet.http.HttpSession;
-        import java.util.ArrayList;
+import java.io.IOException;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/odataforaction")
@@ -59,6 +61,10 @@ public class EDMForAllForActionController {
         } catch (RuntimeException e) {
             LOG.error("Server Error occurred in DemoServlet", e);
             throw e;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

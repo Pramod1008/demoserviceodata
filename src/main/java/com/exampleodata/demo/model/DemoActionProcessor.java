@@ -1,6 +1,7 @@
 package com.exampleodata.demo.model;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceAction;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.json.simple.parser.ParseException;
 
 
 public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCollectionProcessor, ActionEntityProcessor {
@@ -59,6 +61,8 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
     @Override
     public void processActionVoid(ODataRequest request, ODataResponse response, UriInfo uriInfo,
                                   ContentType requestFormat) throws ODataApplicationException, ODataLibraryException {
+        try {
+            DemoEdmProviderForAllForAction demoEdmProviderForAllForAction=new DemoEdmProviderForAllForAction();
 
         // 1st Get the action from the resource path
         final EdmAction edmAction = ((UriResourceAction) uriInfo.asUriInfoResource().getUriResourceParts()
@@ -74,7 +78,7 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
         final ODataDeserializer deserializer = odata.createDeserializer(requestFormat);
         final Map<String, Parameter> actionParameter = deserializer.actionParameters(request.getBody(), edmAction)
                 .getActionParameters();
-        final Parameter parameterAmount = actionParameter.get(DemoEdmProviderForAllForAction.PARAMETER_AMOUNT);
+        final Parameter parameterAmount = actionParameter.get(demoEdmProviderForAllForAction.PARAMETER_AMOUNT);
 
         // The parameter amount is nullable
         if(parameterAmount.isNull()) {
@@ -85,6 +89,11 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
         }
 
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

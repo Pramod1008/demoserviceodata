@@ -1,5 +1,6 @@
 package com.exampleodata.demo.data;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -24,6 +25,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,7 @@ public class StorageForAction {
 
 
     public Entity readFunctionImportEntity(final UriResourceFunction uriResourceFunction,
-                                           final ServiceMetadata serviceMetadata) throws ODataApplicationException {
+                                           final ServiceMetadata serviceMetadata) throws ODataApplicationException, IOException, ParseException {
 
         final EntityCollection entityCollection = readFunctionImportCollection(uriResourceFunction, serviceMetadata);
         final EdmEntityType edmEntityType = (EdmEntityType) uriResourceFunction.getFunction().getReturnType().getType();
@@ -59,8 +61,8 @@ public class StorageForAction {
     }
 
     public EntityCollection readFunctionImportCollection(final UriResourceFunction uriResourceFunction,
-                                                         final ServiceMetadata serviceMetadata) throws ODataApplicationException {
-
+                                                         final ServiceMetadata serviceMetadata) throws ODataApplicationException, IOException, ParseException {
+        DemoEdmProviderForAllForAction demoEdmProviderForAllForAction=new DemoEdmProviderForAllForAction();
         if(DemoEdmProviderForAllForAction.FUNCTION_COUNT_CATEGORIES.equals(uriResourceFunction.getFunctionImport().getName())) {
             final List<Entity> resultEntityList = new ArrayList<Entity>();
             Entity entity=getCategoryCount();
@@ -93,17 +95,17 @@ public class StorageForAction {
             }catch (Exception e){
                 throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
             }
-        } else if(DemoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
+        } else if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
             String query=null;
             int limit;
             try
             {
                 if(uriResourceFunction.getParameters().size()==0){
-                    query=DemoEdmProviderForAllForAction.QUERY;
+                    query=demoEdmProviderForAllForAction.QUERY;
                 }else{
                     final UriParameter parameterTop=uriResourceFunction.getParameters().get(0);
                     limit=Integer.parseInt(parameterTop.getText());
-                    query=DemoEdmProviderForAllForAction.QUERY+" "+DemoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
+                    query=demoEdmProviderForAllForAction.QUERY+" "+demoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
                 }
                 EntityCollection entityCollectionget=AllProducts(query);
                 return  entityCollectionget;

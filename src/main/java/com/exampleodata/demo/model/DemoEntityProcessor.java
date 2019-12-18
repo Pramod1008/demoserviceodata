@@ -1,6 +1,7 @@
 package com.exampleodata.demo.model;
 
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +32,7 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceFunction;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.*;
+import org.json.simple.parser.ParseException;
 ;
 
 public class DemoEntityProcessor implements EntityProcessor {
@@ -64,7 +66,13 @@ public class DemoEntityProcessor implements EntityProcessor {
             }
             readEntityInternal(request, response, uriInfo, responseFormat);
         } else if(uriResource instanceof UriResourceFunction) {
-            readFunctionImportInternal(request, response, uriInfo, responseFormat);
+            try {
+                readFunctionImportInternal(request, response, uriInfo, responseFormat);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         } else {
             throw new ODataApplicationException("Only EntitySet is supported",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
@@ -157,7 +165,7 @@ public class DemoEntityProcessor implements EntityProcessor {
     }
 
     private void readFunctionImportInternal(final ODataRequest request, final ODataResponse response,
-                                            final UriInfo uriInfo, final ContentType responseFormat) throws ODataApplicationException, SerializerException {
+                                            final UriInfo uriInfo, final ContentType responseFormat) throws ODataApplicationException, SerializerException, IOException, ParseException {
 
         // 1st step: Analyze the URI and fetch the entity returned by the function import
         // Function Imports are always the first segment of the resource path
