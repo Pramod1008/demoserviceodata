@@ -42,7 +42,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
     private ServiceMetadata serviceMetadata;
     // our database-mock
     private StorageForAction storage;
-    private CustomFunction customFunction;
+
 
     public DemoEntityCollectionProcessorForAction(StorageForAction storage) {
         this.storage = storage;
