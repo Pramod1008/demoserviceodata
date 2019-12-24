@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import com.exampleodata.demo.data.CustomFunction;
 import com.exampleodata.demo.data.StorageForAction;
 import com.exampleodata.demo.data.UtilForAction;
 import org.apache.olingo.commons.api.Constants;
@@ -33,7 +32,6 @@ import org.apache.olingo.server.api.uri.*;
 import org.apache.olingo.server.api.uri.queryoption.*;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.core.uri.UriResourceSingletonImpl;
 import org.json.simple.parser.ParseException;
 
 
