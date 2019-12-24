@@ -1,8 +1,16 @@
-{
-  "FUNCTION_NAME": "GetTopProducts",
-  "PARAMETER_AMOUNT": "Limit",
+[{
+  "FUNCTION_NAME": "GetAllProducts",
+  "PARAMETER_AMOUNT": " ",
   "QUERY": "SELECT * FROM studentapplication.product ",
   "SET_RETURN_TYPE": "Product",
   "SET_COLLECTION": true,
   "SET_BOUND": false
-  }
+  },
+  {
+    "FUNCTION_NAME": "GetTopProducts",
+    "PARAMETER_AMOUNT": "Limit ",
+    "QUERY": "SELECT * FROM studentapplication.product ",
+    "SET_RETURN_TYPE": "Product",
+    "SET_COLLECTION": true,
+    "SET_BOUND": false
+  }]

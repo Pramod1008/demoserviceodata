@@ -7,10 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 import com.exampleodata.demo.model.DemoEdmProviderForAllForAction;
 import org.apache.olingo.commons.api.data.Entity;
@@ -62,40 +59,19 @@ public class StorageForAction {
 
     public EntityCollection readFunctionImportCollection(final UriResourceFunction uriResourceFunction,
                                                          final ServiceMetadata serviceMetadata) throws ODataApplicationException, IOException, ParseException {
+        LinkedList functionLinkedList=null;
         DemoEdmProviderForAllForAction demoEdmProviderForAllForAction=new DemoEdmProviderForAllForAction();
-        if(DemoEdmProviderForAllForAction.FUNCTION_COUNT_CATEGORIES.equals(uriResourceFunction.getFunctionImport().getName())) {
-            final List<Entity> resultEntityList = new ArrayList<Entity>();
-            Entity entity=getCategoryCount();
-            resultEntityList.add(entity);
+        functionLinkedList=demoEdmProviderForAllForAction.getFunctionList();
 
-            final EntityCollection resultCollection = new EntityCollection();
-            resultCollection.getEntities().addAll(resultEntityList);
-            return resultCollection;
-        }else if(DemoEdmProviderForAllForAction.FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT.equals(uriResourceFunction.getFunctionImport().getName())) {
-            final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
-            try
-            {
-                for(final Entity price:productList){
-                    LOG.info("PriceList",price);
-                }
-            }catch (Exception e){
-                throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
+
+        for(int i=0;i<functionLinkedList.size();i++) {
+            HashMap hm = (HashMap) functionLinkedList.get(i);
+            if(hm.containsKey("FUNCTION_NAME")){
+                demoEdmProviderForAllForAction.FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");
+                demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
             }
-            return null;
-        }else if(DemoEdmProviderForAllForAction.FUNCTION_GET_ALL_PRODUCTS.equals(uriResourceFunction.getFunctionImport().getName())) {
-           // final UriParameter parameterDiscount=uriResourceFunction.getParameters().get(0);
-            try
-            {
-                // EntityCollection entityCollectionget=AllProducts();
-//                EntityCollection entityCollection = readEntitySetData(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME);
-//                return entityCollection;
-                String query="SELECT * FROM studentapplication.product";
-                EntityCollection entityCollectionget=AllProducts(query);
-                return  entityCollectionget;
-            }catch (Exception e){
-                throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
-            }
-        } else if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
+        }
+        if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
             String query=null;
             int limit;
             try

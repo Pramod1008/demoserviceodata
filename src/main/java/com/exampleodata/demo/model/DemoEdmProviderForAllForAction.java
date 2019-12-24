@@ -2,42 +2,35 @@ package com.exampleodata.demo.model;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-        import java.util.Arrays;
-        import java.util.List;
+import java.util.*;
 
-        import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-        import org.apache.olingo.commons.api.edm.FullQualifiedName;
-        import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-        import org.apache.olingo.commons.api.edm.provider.CsdlAction;
-        import org.apache.olingo.commons.api.edm.provider.CsdlActionImport;
-        import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
-        import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
-        import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
-        import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-        import org.apache.olingo.commons.api.edm.provider.CsdlFunction;
-        import org.apache.olingo.commons.api.edm.provider.CsdlFunctionImport;
-        import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
-        import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
-        import org.apache.olingo.commons.api.edm.provider.CsdlParameter;
-        import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
-        import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-        import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
-        import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlFunction;
+import org.apache.olingo.commons.api.edm.provider.CsdlFunctionImport;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
+import org.apache.olingo.commons.api.edm.provider.CsdlParameter;
+import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
+import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
+import org.apache.olingo.server.api.uri.UriResourceFunction;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/*
- * this class is supposed to declare the metadata of the OData service
- * it is invoked by the Olingo framework e.g. when the metadata document of the service is invoked
- * e.g. http://localhost:8080/ExampleService1/ExampleService1.svc/$metadata
- */
+
 public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
-
-    JSONParser jsonParser=new JSONParser();
-    JSONObject jsonObject= (JSONObject) jsonParser.parse(new FileReader("E:\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\Example.json"));
-
+ private static final Logger LOG = LoggerFactory.getLogger(DemoEdmProviderForAllForAction.class);
     // Service Namespace
     public static final String NAMESPACE = "OData.Demo";
 
@@ -59,169 +52,75 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public static final String ET_CATEGORY_COUNT = "CategoryCount";
     public static final FullQualifiedName ET_CategoryCount_FQN = new FullQualifiedName(NAMESPACE, ET_CATEGORY_COUNT);
 
-
-    // Action
-    public static final String ACTION_RESET = "Reset";
-    public static final FullQualifiedName ACTION_RESET_FQN = new FullQualifiedName(NAMESPACE, ACTION_RESET);
-
-    //Bound Action
-    public static final String ACTION_PROVIDE_DISCOUNT = "DiscountProducts";
-    public static final FullQualifiedName ACTION_PROVIDE_DISCOUNT_FQN = new FullQualifiedName(NAMESPACE, ACTION_PROVIDE_DISCOUNT);
-
-    //Bound Action
-    public static final String ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT = "DiscountProduct";
-    public static final FullQualifiedName ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN = new FullQualifiedName(NAMESPACE, ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT);
-
-    // Function
-    public static final String FUNCTION_COUNT_CATEGORIES = "GetCountCategories";
-    public static final FullQualifiedName FUNCTION_COUNT_CATEGORIES_FQN
-            = new FullQualifiedName(NAMESPACE, FUNCTION_COUNT_CATEGORIES);
-
-    //Get All Product Details
-    public static final String FUNCTION_GET_ALL_PRODUCTS = "GetAllProducts";
-    public static final FullQualifiedName FUNCTION_GET_PRODUCTS_FQN
-            = new FullQualifiedName(NAMESPACE, FUNCTION_GET_ALL_PRODUCTS);
-
-    //Bound Function
-    public static final String FUNCTION_PROVIDE_DISCOUNT = "GetDiscountProducts";
-    public static final FullQualifiedName FUNCTION_PROVIDE_DISCOUNT_FQN = new FullQualifiedName(NAMESPACE, FUNCTION_PROVIDE_DISCOUNT);
-
-    public static final String FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT = "GetDiscountProduct";
-    public static final FullQualifiedName FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN = new FullQualifiedName(NAMESPACE, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT);
-
-    //Get All Product Details
-    public final String FUNCTION_NAME =(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
-    public final FullQualifiedName FUNCTION_NAME_FQN
-            = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
-
+    public String FUNCTION_NAME=null;
+    public FullQualifiedName FUNCTION_NAME_FQN=null;
     // Function Parameters
-    public final String PARAMETER_AMOUNT = (String) jsonObject.get("PARAMETER_AMOUNT");//"limit ";
+    public String PARAMETER_AMOUNT = null;
 
     //Query
-    public final String QUERY = (String) jsonObject.get("QUERY");//"SELECT * FROM studentapplication.product ";
+    public String QUERY =null;
 
     //Return Type
-    public  final FullQualifiedName SET_RETURN_TYPE =new FullQualifiedName (NAMESPACE, (String) jsonObject.get("SET_RETURN_TYPE"));//ET_PRODUCT_FQN;
+    public FullQualifiedName SET_RETURN_TYPE =null;
 
     //set collection
-    public final boolean SET_COLLECTION=(boolean) jsonObject.get("SET_COLLECTION");//true;
+    public boolean SET_COLLECTION=false;
 
     //set Bound
-    public final boolean SET_BOUND=(boolean) jsonObject.get("SET_BOUND");//false;
+    public boolean SET_BOUND=false;
 
-    //Bound Action Binding Parameter
-    public static final String PARAMETER_CATEGORY = "ParamCategory";
-
-    //Bound Function Binding Parameter
-    public static final String PARAMETER_BIND = "BindingParameter";
-
-    //get CategoryCount
-    public static final String PARAMETER_GET_CATEGORY_COUNT ="CategoryCount";
+    LinkedList functionLinkedList=null;
 
     public DemoEdmProviderForAllForAction() throws IOException, ParseException {
+        functionLinkedList=getFunctionList();
     }
 
-    @Override
-    public List<CsdlAction> getActions(final FullQualifiedName actionName) {
-        // It is allowed to overload actions, so we have to provide a list of Actions for each action name
-        final List<CsdlAction> actions = new ArrayList<CsdlAction>();
-        if(actionName.equals(ACTION_RESET_FQN)) {
+    public LinkedList getFunctionList() throws IOException, ParseException {
+        final UriResourceFunction uriResourceFunction=null;
+        JSONParser jsonParser=new JSONParser();
+        Object obj= jsonParser.parse(new FileReader("E:\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\Example.json"));
 
-            // Create parameters
-            final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            final CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_AMOUNT);
-            parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            parameters.add(parameter);
+        JSONArray jsonArray=(JSONArray) obj;
 
-            // Create the Csdl Action
-            final CsdlAction action = new CsdlAction();
-            action.setName(ACTION_RESET_FQN.getName());
-            action.setParameters(parameters);
-            actions.add(action);
+        int length = jsonArray.size();
 
-            return actions;
-        } else if (actionName.equals(ACTION_PROVIDE_DISCOUNT_FQN)) {
-            // Create parameters
-            final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_CATEGORY);
-            parameter.setType(ET_CATEGORY_FQN);
-            parameter.setCollection(true);
-            parameters.add(parameter);
-            parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_AMOUNT);
-            parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            parameters.add(parameter);
+        LinkedList functionList = new LinkedList();
 
-            // Create the Csdl Action
-            final CsdlAction action = new CsdlAction();
-            action.setName(ACTION_PROVIDE_DISCOUNT_FQN.getName());
-            action.setBound(true);
-            action.setParameters(parameters);
-            action.setReturnType(new CsdlReturnType().setType(ET_PRODUCT_FQN).setCollection(true));
-            actions.add(action);
+        for (int i =0; i< length; i++) {
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+            Set s = jsonObject.entrySet();
+            Iterator iter = s.iterator();
 
-            return actions;
-        } else if (actionName.equals(ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)) {
-            // Create parameters
-            final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_CATEGORY);
-            parameter.setType(ET_CATEGORY_FQN);
-            parameter.setCollection(false);
-            parameters.add(parameter);
-            parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_AMOUNT);
-            parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            parameters.add(parameter);
+            HashMap hm = new HashMap();
 
-            // Create the Csdl Action
-            final CsdlAction action = new CsdlAction();
-            action.setName(ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN.getName());
-            action.setBound(true);
-            action.setParameters(parameters);
-            action.setReturnType(new CsdlReturnType().setType(ET_PRODUCT_FQN).setCollection(false));
-            actions.add(action);
-
-            return actions;
-        }
-
-        return null;
-    }
-
-    @Override
-    public CsdlActionImport getActionImport(final FullQualifiedName entityContainer, final String actionImportName) {
-        if(entityContainer.equals(CONTAINER)) {
-            if(actionImportName.equals(ACTION_RESET_FQN.getName())) {
-                return new CsdlActionImport()
-                        .setName(actionImportName)
-                        .setAction(ACTION_RESET_FQN);
+            while(iter.hasNext()){
+                Map.Entry me = (Map.Entry) iter.next();
+                hm.put(me.getKey(), me.getValue());
             }
+            functionList.add(hm);
         }
-
-        return null;
+        return functionList;
     }
 
     @Override
     public List<CsdlFunction> getFunctions(final FullQualifiedName functionName) {
         final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-        if (functionName.equals(FUNCTION_COUNT_CATEGORIES_FQN)) {
-                  // Create the return type of the function
-            final CsdlReturnType returnType = new CsdlReturnType();
-            returnType.setCollection(false);
-            returnType.setType(ET_CategoryCount_FQN);
-            //returnType.setType(PARAMETER_Get_Category_Count);
+              if (functionName.equals(FUNCTION_NAME_FQN)) {
+            //for(int i=0;i<functionLinkedList.size();i++) {
+                //HashMap hm = (HashMap) functionLinkedList.get(i);
+                functionLinkedList.contains("FUNCTION_NAME");
+//                if(hm.containsKey("FUNCTION_NAME")){
+//                    FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
+//                    FUNCTION_NAME_FQN
+//                            = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+//                    PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+//                    QUERY=(String) hm.get("QUERY");
+//                    SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+//                    SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
+//                    SET_BOUND = (boolean) hm.get("SET_BOUND");
+//                }
+            //}
 
-            // Create the function
-            final CsdlFunction function = new CsdlFunction();
-            function.setName(FUNCTION_COUNT_CATEGORIES_FQN.getName())
-                   // .setParameters(Arrays.asList(parameterAmount))
-                    .setReturnType(returnType);
-            functions.add(function);
-
-            return functions;
-        } else if (functionName.equals(FUNCTION_NAME_FQN)) {
             // Create the parameter for the function
             final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
             if(!PARAMETER_AMOUNT.trim().isEmpty()) {
@@ -244,80 +143,20 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
             return functions;
 
-        } else if (functionName.equals(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)) {
-            // Create the parameter for the function
-            final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            CsdlParameter parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_CATEGORY);
-            //parameter.setNullable(false);
-            parameter.setType(ET_CATEGORY_FQN);
-            parameters.add(parameter);
-            parameter = new CsdlParameter();
-            parameter.setName(PARAMETER_AMOUNT);
-            parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-            parameters.add(parameter);
-
-            // Create the return type of the function
-            final CsdlReturnType returnType = new CsdlReturnType();
-            returnType.setType(ET_PRODUCT_FQN);
-
-            // Create the function
-            final CsdlFunction function = new CsdlFunction();
-            function.setName(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN.getName())
-                    .setParameters(parameters)
-                    .setBound(true).setReturnType(returnType);
-            functions.add(function);
-
-            return functions;
-
-        }else if (functionName.equals(FUNCTION_GET_PRODUCTS_FQN)) {
-
-            final CsdlReturnType returnType = new CsdlReturnType();
-            returnType.setCollection(true);
-            returnType.setType(ET_PRODUCT_FQN);
-
-            // Create the function
-            final CsdlFunction function = new CsdlFunction();
-            function.setName(FUNCTION_GET_PRODUCTS_FQN.getName())
-                    .setReturnType(returnType);
-            functions.add(function);
-
-            return functions;
         }
-
-
         return null;
     }
 
     @Override
     public CsdlFunctionImport getFunctionImport(FullQualifiedName entityContainer, String functionImportName) {
         if(entityContainer.equals(CONTAINER)) {
-            if(functionImportName.equals(FUNCTION_COUNT_CATEGORIES_FQN.getName())) {
-                return new CsdlFunctionImport()
-                        .setName(functionImportName)
-                        .setFunction(FUNCTION_COUNT_CATEGORIES_FQN)
-                        //.setEntitySet(ES_CATEGORIES_NAME)
-                        .setIncludeInServiceDocument(true);
-            }else if(functionImportName.equals(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN.getName())){
-                return new CsdlFunctionImport()
-                        .setName(functionImportName)
-                        .setFunction(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN)
-                        .setEntitySet(ES_PRODUCTS_NAME)
-                        .setIncludeInServiceDocument(true);
-            }else if(functionImportName.equals(FUNCTION_NAME_FQN.getName())){
+         if(functionImportName.equals(FUNCTION_NAME_FQN.getName())){
                 return new CsdlFunctionImport()
                         .setName(functionImportName)
                         .setFunction(FUNCTION_NAME_FQN)
                         .setEntitySet(ES_PRODUCTS_NAME)
                         .setIncludeInServiceDocument(true);
-            }else if(functionImportName.equals(FUNCTION_GET_PRODUCTS_FQN.getName())){
-                return new CsdlFunctionImport()
-                        .setName(functionImportName)
-                        .setFunction(FUNCTION_GET_PRODUCTS_FQN)
-                        .setEntitySet(ES_PRODUCTS_NAME)
-                        .setIncludeInServiceDocument(true);
             }
-
         }
 
         return null;
@@ -451,19 +290,18 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         entityTypes.add(getEntityType(ET_CategoryCount_FQN));
         schema.setEntityTypes(entityTypes);
 
-        // add actions
-        List<CsdlAction> actions = new ArrayList<CsdlAction>();
-        actions.addAll(getActions(ACTION_RESET_FQN));
-        actions.addAll(getActions(ACTION_PROVIDE_DISCOUNT_FQN));
-        actions.addAll(getActions(ACTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN));
-        schema.setActions(actions);
 
-        // add functions
         List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
-        functions.addAll(getFunctions(FUNCTION_COUNT_CATEGORIES_FQN));
-        functions.addAll(getFunctions(FUNCTION_NAME_FQN));
-        functions.addAll(getFunctions(FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT_FQN));
-        functions.addAll(getFunctions(FUNCTION_GET_PRODUCTS_FQN));
+
+        for(int i=0;i<functionLinkedList.size();i++) {
+            HashMap hm = (HashMap) functionLinkedList.get(i);
+            if(hm.containsKey("FUNCTION_NAME")){
+                FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
+                FUNCTION_NAME_FQN
+                        = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+                functions.addAll(getFunctions(FUNCTION_NAME_FQN));
+            }
+        }
 
         schema.setFunctions(functions);
 
@@ -485,22 +323,24 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
         // Create function imports
         List<CsdlFunctionImport> functionImports = new ArrayList<CsdlFunctionImport>();
-        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_COUNT_CATEGORIES));
-        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_NAME));
-        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_PROVIDE_DISCOUNT_FOR_PRODUCT));
-        functionImports.add(getFunctionImport(CONTAINER, FUNCTION_GET_ALL_PRODUCTS));
+        for(int i=0;i<functionLinkedList.size();i++) {
+            HashMap hm = (HashMap) functionLinkedList.get(i);
+            if(hm.containsKey("FUNCTION_NAME"))
+            {
+                FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
+                FUNCTION_NAME_FQN
+                        = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
 
-
-        // Create action imports
-        List<CsdlActionImport> actionImports = new ArrayList<CsdlActionImport>();
-        actionImports.add(getActionImport(CONTAINER, ACTION_RESET));
+                functionImports.add(getFunctionImport(CONTAINER, FUNCTION_NAME));
+            }
+        }
 
         // create EntityContainer
         CsdlEntityContainer entityContainer = new CsdlEntityContainer();
         entityContainer.setName(CONTAINER_NAME);
         entityContainer.setEntitySets(entitySets);
         entityContainer.setFunctionImports(functionImports);
-        entityContainer.setActionImports(actionImports);
+        //entityContainer.setActionImports(actionImports);
 
         return entityContainer;
 
