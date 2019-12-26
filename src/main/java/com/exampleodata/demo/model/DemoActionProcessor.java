@@ -117,14 +117,15 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
                         .getAction();
                 throw new ODataApplicationException("Action " + action.getName() + " is not yet implemented.",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
-            } else if (resourcePaths.get(0) instanceof UriResourceEntitySet) {
-                action = ((UriResourceAction) resourcePaths.get(1))
-                        .getAction();
-                parameters = deserializer.actionParameters(request.getBody(), action)
-                        .getActionParameters();
-                entityResult =
-                        storage.processBoundActionEntity(action, parameters, boundEntity.getKeyPredicates());
             }
+//            else if (resourcePaths.get(0) instanceof UriResourceEntitySet) {
+//                action = ((UriResourceAction) resourcePaths.get(1))
+//                        .getAction();
+//                parameters = deserializer.actionParameters(request.getBody(), action)
+//                        .getActionParameters();
+//                entityResult =
+//                        storage.processBoundActionEntity(action, parameters, boundEntity.getKeyPredicates());
+//            }
         }
         final EdmEntitySet edmEntitySet = boundEntity.getEntitySet();
         final EdmEntityType type = (EdmEntityType) action.getReturnType().getType();
@@ -200,14 +201,15 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
                         .getAction();
                 throw new ODataApplicationException("Action " + action.getName() + " is not yet implemented.",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
-            }else {
-                action = ((UriResourceAction) resourcePaths.get(1))
-                        .getAction();
-                parameters = deserializer.actionParameters(request.getBody(), action)
-                        .getActionParameters();
-                collection =
-                        storage.processBoundActionEntityCollection(action, parameters);
             }
+//            else {
+//                action = ((UriResourceAction) resourcePaths.get(1))
+//                        .getAction();
+//                parameters = deserializer.actionParameters(request.getBody(), action)
+//                        .getActionParameters();
+//                collection =
+//                        storage.processBoundActionEntityCollection(action, parameters);
+//            }
         }
         // Collections must never be null.
         // Not nullable return types must not contain a null value.
