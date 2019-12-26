@@ -49,7 +49,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public static final String ES_PRODUCTS_NAME = "Products";
     public static final String ES_CATEGORIES_NAME = "Categories";
 
-    public static final String ET_CATEGORY_COUNT = "CategoryCount";
+    public static final String ET_CATEGORY_COUNT = "count";
     public static final FullQualifiedName ET_CategoryCount_FQN = new FullQualifiedName(NAMESPACE, ET_CATEGORY_COUNT);
 
     public String FUNCTION_NAME=null;
@@ -78,7 +78,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public LinkedList getFunctionList() throws IOException, ParseException {
         final UriResourceFunction uriResourceFunction=null;
         JSONParser jsonParser=new JSONParser();
-        Object obj= jsonParser.parse(new FileReader("E:\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\Example.json"));
+        Object obj= jsonParser.parse(new FileReader("D:\\Pramod\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\Example.json"));
 
         JSONArray jsonArray=(JSONArray) obj;
 
@@ -106,43 +106,41 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public List<CsdlFunction> getFunctions(final FullQualifiedName functionName) {
         final List<CsdlFunction> functions = new ArrayList<CsdlFunction>();
               if (functionName.equals(FUNCTION_NAME_FQN)) {
-            //for(int i=0;i<functionLinkedList.size();i++) {
-                //HashMap hm = (HashMap) functionLinkedList.get(i);
-                functionLinkedList.contains("FUNCTION_NAME");
-//                if(hm.containsKey("FUNCTION_NAME")){
-//                    FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
-//                    FUNCTION_NAME_FQN
-//                            = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
-//                    PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
-//                    QUERY=(String) hm.get("QUERY");
-//                    SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
-//                    SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
-//                    SET_BOUND = (boolean) hm.get("SET_BOUND");
-//                }
-            //}
+            for(int i=0;i<functionLinkedList.size();i++) {
+                HashMap hm = (HashMap) functionLinkedList.get(i);
+                //functionLinkedList.contains("FUNCTION_NAME");
+                if(hm.containsKey("FUNCTION_NAME") && hm.get("FUNCTION_NAME").equals(FUNCTION_NAME_FQN.getName())){
+                    //FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
+                    //FUNCTION_NAME_FQN= new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+                    PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+                    QUERY=(String) hm.get("QUERY");
+                    SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+                    SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
+                    SET_BOUND = (boolean) hm.get("SET_BOUND");
 
-            // Create the parameter for the function
-            final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
-            if(!PARAMETER_AMOUNT.trim().isEmpty()) {
+                    // Create the parameter for the function
+                    final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
+                    if(!PARAMETER_AMOUNT.trim().isEmpty()) {
 
-                CsdlParameter parameter = new CsdlParameter();
-                parameter.setName(PARAMETER_AMOUNT);
-                parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-                parameters.add(parameter);
+                        CsdlParameter parameter = new CsdlParameter();
+                        parameter.setName(PARAMETER_AMOUNT);
+                        parameter.setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+                        parameters.add(parameter);
+                    }
+                    // Create the return type of the function
+                    final CsdlReturnType returnType = new CsdlReturnType();
+                    returnType.setCollection(SET_COLLECTION).setType(SET_RETURN_TYPE);
+
+                    // Create the function
+                    final CsdlFunction function = new CsdlFunction();
+                    function.setName(FUNCTION_NAME_FQN.getName())
+                            .setParameters(parameters)
+                            .setBound(SET_BOUND).setReturnType(returnType);
+                    functions.add(function);
+
+                    return functions;
+                }
             }
-            // Create the return type of the function
-            final CsdlReturnType returnType = new CsdlReturnType();
-            returnType.setCollection(SET_COLLECTION).setType(SET_RETURN_TYPE);
-
-            // Create the function
-            final CsdlFunction function = new CsdlFunction();
-            function.setName(FUNCTION_NAME_FQN.getName())
-                    .setParameters(parameters)
-                    .setBound(SET_BOUND).setReturnType(returnType);
-            functions.add(function);
-
-            return functions;
-
         }
         return null;
     }
@@ -150,14 +148,28 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     @Override
     public CsdlFunctionImport getFunctionImport(FullQualifiedName entityContainer, String functionImportName) {
         if(entityContainer.equals(CONTAINER)) {
-         if(functionImportName.equals(FUNCTION_NAME_FQN.getName())){
-                return new CsdlFunctionImport()
-                        .setName(functionImportName)
-                        .setFunction(FUNCTION_NAME_FQN)
-                        .setEntitySet(ES_PRODUCTS_NAME)
-                        .setIncludeInServiceDocument(true);
+            for (int i = 0; i < functionLinkedList.size(); i++) {
+                HashMap hm = (HashMap) functionLinkedList.get(i);
+                if(hm.containsKey("FUNCTION_NAME")) {
+                    FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");
+                    FUNCTION_NAME_FQN = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+                    PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+                    QUERY=(String) hm.get("QUERY");
+                    SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+                    SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
+                    SET_BOUND = (boolean) hm.get("SET_BOUND");
+
+                    if (functionImportName.equals(FUNCTION_NAME_FQN.getName())) {
+                        return new CsdlFunctionImport()
+                                .setName(functionImportName)
+                                .setFunction(FUNCTION_NAME_FQN)
+                                .setEntitySet(ES_PRODUCTS_NAME)
+                                .setIncludeInServiceDocument(true);
+                    }
+                }
             }
         }
+
 
         return null;
     }
@@ -299,6 +311,12 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                 FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
                 FUNCTION_NAME_FQN
                         = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+                PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+                QUERY=(String) hm.get("QUERY");
+                SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+                SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
+                SET_BOUND = (boolean) hm.get("SET_BOUND");
+
                 functions.addAll(getFunctions(FUNCTION_NAME_FQN));
             }
         }
@@ -330,6 +348,11 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                 FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");//(String) jsonObject.get("FUNCTION_NAME");//"GetTopProducts";
                 FUNCTION_NAME_FQN
                         = new FullQualifiedName(NAMESPACE, FUNCTION_NAME);
+                PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+                QUERY=(String) hm.get("QUERY");
+                SET_RETURN_TYPE = new FullQualifiedName(NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+                SET_COLLECTION= (boolean) hm.get("SET_COLLECTION");
+                SET_BOUND = (boolean) hm.get("SET_BOUND");
 
                 functionImports.add(getFunctionImport(CONTAINER, FUNCTION_NAME));
             }

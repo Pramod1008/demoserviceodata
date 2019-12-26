@@ -8,9 +8,25 @@
   },
   {
     "FUNCTION_NAME": "GetTopProducts",
-    "PARAMETER_AMOUNT": "Limit ",
+    "PARAMETER_AMOUNT": "Limit",
     "QUERY": "SELECT * FROM studentapplication.product ",
     "SET_RETURN_TYPE": "Product",
+    "SET_COLLECTION": true,
+    "SET_BOUND": false
+  },
+  {
+    "FUNCTION_NAME": "GetAllCategories",
+    "PARAMETER_AMOUNT": " ",
+    "QUERY": "SELECT * FROM studentapplication.category ",
+    "SET_RETURN_TYPE": "Category",
+    "SET_COLLECTION": true,
+    "SET_BOUND": false
+  },
+  {
+    "FUNCTION_NAME": "GetTopCategories",
+    "PARAMETER_AMOUNT": "Limit",
+    "QUERY": "SELECT * FROM studentapplication.category ",
+    "SET_RETURN_TYPE": "Category",
     "SET_COLLECTION": true,
     "SET_BOUND": false
   }]
