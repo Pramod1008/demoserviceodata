@@ -3,10 +3,7 @@ package com.exampleodata.demo.data;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 import com.exampleodata.demo.model.DemoEdmProviderForAllForAction;
@@ -58,7 +55,7 @@ public class StorageForAction {
                                                          final ServiceMetadata serviceMetadata) throws ODataApplicationException, IOException, ParseException {
         LinkedList functionLinkedList=null;
         DemoEdmProviderForAllForAction demoEdmProviderForAllForAction=new DemoEdmProviderForAllForAction();
-        functionLinkedList=demoEdmProviderForAllForAction.getFunctionList();
+        //functionLinkedList=demoEdmProviderForAllForAction.getFunctionList();
 
 
         for(int i=0;i<functionLinkedList.size();i++) {
@@ -83,12 +80,12 @@ public class StorageForAction {
                             limit=Integer.parseInt(parameterTop.getText());
                             query=demoEdmProviderForAllForAction.QUERY+" "+demoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
                         }
-                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("product")) {
+                        //if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("product")) {
                             entityCollectionget = AllProducts(query);
-                        }else
-                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("category")) {
-                            entityCollectionget = AllCategory(query);
-                        }
+//                        }else
+//                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("category")) {
+//                            entityCollectionget = AllCategory(query);
+//                        }
                         return  entityCollectionget;
 
                     }catch (Exception e){
@@ -144,29 +141,6 @@ public class StorageForAction {
         }
         return null;
         //End Connection
-    }
-
-    public void resetDataSet() {
-        resetDataSet(Integer.MAX_VALUE);
-    }
-
-    public void resetDataSet(final int amount) {
-        // Replace the old lists with empty ones
-        productList = new ArrayList<Entity>();
-        categoryList = new ArrayList<Entity>();
-
-        // Create new sample data
-        initProductSampleData();
-        initCategorySampleData();
-
-        // Truncate the lists
-        if(amount < productList.size()) {
-            productList = productList.subList(0, amount);
-            // Products 0, 1 are linked to category 0
-            // Products 2, 3 are linked to category 1
-            // Products 4, 5 are linked to category 2
-            categoryList = categoryList.subList(0, (amount / 2) + 1);
-        }
     }
 
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) throws ODataApplicationException {
@@ -326,38 +300,31 @@ public class StorageForAction {
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, "root", "admin");
 
-            // our SQL SELECT query.
-            // if you only need a few columns, specify them by name instead of using "*"
-           // String query = "SELECT * FROM studentapplication.product";
-
             // create the java statement
             Statement st = conn.createStatement();
 
             // execute the query, and get a java resultset
             ResultSet rs = st.executeQuery(query);
 
+            List<Map<String,Object>> rows=new ArrayList<Map<String,Object>>();
+
+            ResultSetMetaData metaData=rs.getMetaData();
+            int columnCount=metaData.getColumnCount();
+
             // iterate through the java resultset
             while (rs.next())
             {
-
-                String Name = rs.getString("Name");
-                String Description = rs.getString("Description");
-                int Price = rs.getInt("Price");
-                int Id = rs.getInt("ID");
-
+                Map<String,Object> columns=new LinkedHashMap<String, Object>();
                 Entity entity = new Entity();
 
-                entity.addProperty(new Property(null, "ID", ValueType.PRIMITIVE,Id));
-                entity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, Name));
-                entity.addProperty(new Property(null, "Description", ValueType.PRIMITIVE, Description));
-                entity.addProperty(new Property(null,"Price",ValueType.PRIMITIVE,Price));
-
-
+                for (int i=1;i<=columnCount;i++){
+                columns.put(metaData.getColumnLabel(i),rs.getObject(i));
+                entity.addProperty(new Property(null, metaData.getColumnLabel(i), ValueType.PRIMITIVE,rs.getObject(i)));
+                }
                 entity.setType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString());
                 entity.setId(createId(entity, "ID"));
 
                 productList.add(entity);
-
             }
 
             st.close();

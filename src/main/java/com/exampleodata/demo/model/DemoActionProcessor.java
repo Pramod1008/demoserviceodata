@@ -78,15 +78,9 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
         final ODataDeserializer deserializer = odata.createDeserializer(requestFormat);
         final Map<String, Parameter> actionParameter = deserializer.actionParameters(request.getBody(), edmAction)
                 .getActionParameters();
-        final Parameter parameterAmount = actionParameter.get(demoEdmProviderForAllForAction.PARAMETER_AMOUNT);
+        //final Parameter parameterAmount = actionParameter.get(demoEdmProviderForAllForAction.PARAMETER_AMOUNT);
 
-        // The parameter amount is nullable
-        if(parameterAmount.isNull()) {
-            storage.resetDataSet();
-        } else {
-            final Integer amount = (Integer) parameterAmount.asPrimitive();
-            storage.resetDataSet(amount);
-        }
+
 
         response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
         } catch (IOException e) {
@@ -118,14 +112,7 @@ public class DemoActionProcessor implements ActionVoidProcessor, ActionEntityCol
                 throw new ODataApplicationException("Action " + action.getName() + " is not yet implemented.",
                         HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ENGLISH);
             }
-//            else if (resourcePaths.get(0) instanceof UriResourceEntitySet) {
-//                action = ((UriResourceAction) resourcePaths.get(1))
-//                        .getAction();
-//                parameters = deserializer.actionParameters(request.getBody(), action)
-//                        .getActionParameters();
-//                entityResult =
-//                        storage.processBoundActionEntity(action, parameters, boundEntity.getKeyPredicates());
-//            }
+
         }
         final EdmEntitySet edmEntitySet = boundEntity.getEntitySet();
         final EdmEntityType type = (EdmEntityType) action.getReturnType().getType();

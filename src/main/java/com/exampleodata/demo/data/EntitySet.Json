@@ -1,0 +1,38 @@
+[
+  {
+    "EntityType": "Product",
+    "EntitySet": "Products",
+    "Properties":[
+      {
+        "PropertiesName":  "ID",
+        "PropertiesType":  "int"
+      },
+      {
+        "PropertiesName":  "Name",
+        "PropertiesType":  "String"
+      },
+      {
+        "PropertiesName":  "Description",
+        "PropertiesType":  "String"
+      },
+      {
+        "PropertiesName":  "Price",
+        "PropertiesType":  "Double"
+      }],
+    "NavigationProperty":"Category"
+  },{
+  "EntityType": "Category",
+  "EntitySet": "Categories",
+  "Properties":[
+    {
+      "PropertiesName":  "ID",
+      "PropertiesType":  "int"
+    },
+    {
+      "PropertiesName":  "Name",
+      "PropertiesType":  "String"
+    }
+  ],
+  "NavigationProperty":"Product"
+}
+]
