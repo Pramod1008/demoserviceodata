@@ -35,7 +35,7 @@
   ],
   "NavigationProperty":"Product"
 },{
-  "EntityType": "Count",
+  "EntityType": "CountArray",
   "Properties":[
     {
       "PropertiesName":  "Count",

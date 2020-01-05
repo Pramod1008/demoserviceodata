@@ -34,7 +34,7 @@
     "FUNCTION_NAME": "GetTopCategoriesCount",
     "PARAMETER_AMOUNT": " ",
     "QUERY": "SELECT count(*) FROM studentapplication.category ",
-    "SET_RETURN_TYPE": "Count",
+    "SET_RETURN_TYPE": "CountArray",
     "SET_COLLECTION": false,
     "SET_BOUND": false
   },
@@ -42,7 +42,7 @@
     "FUNCTION_NAME": "GetAllProductsCount",
     "PARAMETER_AMOUNT": " ",
     "QUERY": "SELECT count(*) FROM studentapplication.product ",
-    "SET_RETURN_TYPE": "Count",
+    "SET_RETURN_TYPE": "CountArray",
     "SET_COLLECTION": false,
     "SET_BOUND": false
   }]
