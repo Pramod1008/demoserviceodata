@@ -97,7 +97,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         int length = jsonArray.size();
 
         LinkedList entityList = new LinkedList();
-
+        HashMap<String,EntityListClass> entityListMap = new HashMap<String,EntityListClass>();
 
         for (int i =0; i< length; i++) {
             JSONObject jsonObject = (JSONObject) jsonArray.get(i);
@@ -105,11 +105,22 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
             Iterator iter = s.iterator();
 
             HashMap hm = new HashMap();
-
-
+            EntityListClass entityListClass=new EntityListClass();
+            PropertyList propertyList=new PropertyList();
             while(iter.hasNext()){
                 Map.Entry me = (Map.Entry) iter.next();
                 hm.put(me.getKey(), me.getValue());
+
+                switch (me.getKey().toString()){
+                    case "EntityType":entityListClass.setEntityTypeName(me.getValue().toString());
+                        break;
+                    case "EntitySet":entityListClass.setEntitySet(me.getValue().toString());
+                        break;
+                    //case "Properties":entityListClass.setPropertyList();
+                      //break;
+                    case "NavigationProperty":entityListClass.setNavigationProperty(me.getValue().toString());
+                                            break;
+                }
 
             }
             entityList.add(hm);
@@ -133,13 +144,13 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
             Set s = jsonObject.entrySet();
             Iterator iter = s.iterator();
 
-            HashMap hm = new HashMap();
+            //HashMap hm = new HashMap();
 
             FunctionClass functionClass=new FunctionClass();
 
             while(iter.hasNext()){
                 Map.Entry me = (Map.Entry) iter.next();
-                hm.put(me.getKey(), me.getValue());
+                //hm.put(me.getKey(), me.getValue());
 
                 switch (me.getKey().toString()){
                     case "FUNCTION_NAME":functionClass.setFUNCTION_NAME(me.getValue().toString());
@@ -157,7 +168,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                         break;
                 }
             }
-            functionList.add(hm);
+            //functionList.add(hm);
 
             functionMap.put(functionClass.getFUNCTION_NAME().toString(),functionClass);
         }
@@ -207,14 +218,22 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                 {
                     for(int j=0;j<getEntityList.size();j++) {
                         HashMap hmES = (HashMap) getEntityList.get(j);
-                        if(hmES.containsKey("EntitySet") && functionEntry.getValue().getSET_RETURN_TYPE().getName().equals(hmES.get("EntityType").toString())){
-                            ES_NAME= (String) hmES.get("EntitySet");
+                        if(functionEntry.getValue().getSET_RETURN_TYPE().getName().equals(hmES.get("EntityType").toString()))
+                        {
+                            if(hmES.containsKey("EntitySet")){
+                                ES_NAME= (String) hmES.get("EntitySet");
 
-                            return new CsdlFunctionImport()
-                                    .setName(functionImportName)
-                                    .setFunction(functionEntry.getValue().getFUNCTION_NAME_FQN())
-                                    .setEntitySet(ES_NAME)
-                                    .setIncludeInServiceDocument(true);
+                                return new CsdlFunctionImport()
+                                        .setName(functionImportName)
+                                        .setFunction(functionEntry.getValue().getFUNCTION_NAME_FQN())
+                                        .setEntitySet(ES_NAME)
+                                        .setIncludeInServiceDocument(true);
+                            }else {
+                                return new CsdlFunctionImport()
+                                        .setName(functionImportName)
+                                        .setFunction(functionEntry.getValue().getFUNCTION_NAME_FQN())
+                                        .setIncludeInServiceDocument(true);
+                            }
                         }
                     }
                 }
@@ -264,16 +283,16 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                             }
                         }
                         csdlPropertyList.add(csdlProperty);
-
                     }
 
+                    List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
                     // create PropertyRef for Key element
                     CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-                    propertyRef.setName("ID");
-
-                    List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
                     if(hm.containsKey("NavigationProperty"))
                     {
+
+                        propertyRef.setName("ID");
+
                         NV_NAME= (String) hm.get("NavigationProperty");
                         NV_NAME_FQN=new FullQualifiedName(NAMESPACE,NV_NAME);
 
@@ -284,12 +303,22 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
                                 .setPartner(entityTypeName.getName());
                         //List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
                         navPropList.add(navProp);
+
+                    }else
+                    {
+                        propertyRef.setName("0");
                     }
+
                     entityType = new CsdlEntityType();
                     entityType.setName(entityTypeName.getName());
                     entityType.setProperties(csdlPropertyList);
+
+                    if(!propertyRef.getName().equalsIgnoreCase("0"))
                     entityType.setKey(Arrays.asList(propertyRef));
+
+                    if(navPropList.size()!=0)
                     entityType.setNavigationProperties(navPropList);
+
                     return entityType;
                 }
             }

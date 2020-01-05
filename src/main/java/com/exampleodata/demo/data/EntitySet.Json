@@ -34,5 +34,13 @@
     }
   ],
   "NavigationProperty":"Product"
+},{
+  "EntityType": "Count",
+  "Properties":[
+    {
+      "PropertiesName":  "Count",
+      "PropertiesType":  "int"
+    }
+  ]
 }
 ]

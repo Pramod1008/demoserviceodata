@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.exampleodata.demo.model.DemoEdmProviderForAllForAction;
+import com.exampleodata.demo.model.FunctionClass;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Parameter;
@@ -48,55 +49,82 @@ public class StorageForAction {
         final EntityCollection entityCollection = readFunctionImportCollection(uriResourceFunction, serviceMetadata);
         final EdmEntityType edmEntityType = (EdmEntityType) uriResourceFunction.getFunction().getReturnType().getType();
 
-        return UtilForAction.findEntity(edmEntityType, entityCollection, uriResourceFunction.getKeyPredicates());
+         return UtilForAction.findEntity(edmEntityType, entityCollection, uriResourceFunction.getKeyPredicates());
     }
 
     public EntityCollection readFunctionImportCollection(final UriResourceFunction uriResourceFunction,
                                                          final ServiceMetadata serviceMetadata) throws ODataApplicationException, IOException, ParseException {
-        LinkedList functionLinkedList=null;
+        HashMap<String, FunctionClass> functionLinkedList=null;
         DemoEdmProviderForAllForAction demoEdmProviderForAllForAction=new DemoEdmProviderForAllForAction();
-        //functionLinkedList=demoEdmProviderForAllForAction.getFunctionList();
+        functionLinkedList=demoEdmProviderForAllForAction.getFunctionList();
 
-
-        for(int i=0;i<functionLinkedList.size();i++) {
-            HashMap hm = (HashMap) functionLinkedList.get(i);
-            if(hm.containsKey("FUNCTION_NAME")){
-                demoEdmProviderForAllForAction.FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");
-                  if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
-                    String query=null;
-                    EntityCollection entityCollectionget=null;
-                    int limit;
-
-                    try
+        for (Map.Entry<String, FunctionClass> functionEntry : functionLinkedList.entrySet()) {
+            if(functionEntry.getKey().equals(uriResourceFunction.getFunctionImport().getName())) {
+                try
                     {
-
-                        demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
-                        demoEdmProviderForAllForAction.PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
-                        demoEdmProviderForAllForAction.SET_RETURN_TYPE=new FullQualifiedName(DemoEdmProviderForAllForAction.NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+                        String query=null;
+                        EntityCollection entityCollectionget=null;
+                         int limit;
+//                        demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
+//                        demoEdmProviderForAllForAction.PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+//                        demoEdmProviderForAllForAction.SET_RETURN_TYPE=new FullQualifiedName(DemoEdmProviderForAllForAction.NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
                         if(uriResourceFunction.getParameters().size()==0){
-                            query=demoEdmProviderForAllForAction.QUERY;
+                            query=functionEntry.getValue().getQUERY();
                         }else{
                             final UriParameter parameterTop=uriResourceFunction.getParameters().get(0);
                             limit=Integer.parseInt(parameterTop.getText());
-                            query=demoEdmProviderForAllForAction.QUERY+" "+demoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
+                            query=functionEntry.getValue().getQUERY()+" "+functionEntry.getValue().getPARAMETER_AMOUNT()+" "+limit;
                         }
-                        //if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("product")) {
-                            entityCollectionget = AllProducts(query);
-//                        }else
-//                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("category")) {
-//                            entityCollectionget = AllCategory(query);
-//                        }
+                            FullQualifiedName et_Name= functionEntry.getValue().getSET_RETURN_TYPE();
+                            entityCollectionget = AllProducts(query, et_Name);
+
                         return  entityCollectionget;
 
                     }catch (Exception e){
                         throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
                     }
-                }
-            }else {
-                throw new ODataApplicationException("Function not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-                        Locale.ROOT);
             }
         }
+
+//        for(int i=0;i<functionLinkedList.size();i++) {
+//            HashMap hm = (HashMap) functionLinkedList.get(i);
+//            if(hm.containsKey("FUNCTION_NAME")){
+//                demoEdmProviderForAllForAction.FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");
+//                  if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
+//                    String query=null;
+//                    EntityCollection entityCollectionget=null;
+//                    int limit;
+//
+//                    try
+//                    {
+//
+//                        demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
+//                        demoEdmProviderForAllForAction.PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
+//                        demoEdmProviderForAllForAction.SET_RETURN_TYPE=new FullQualifiedName(DemoEdmProviderForAllForAction.NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
+//                        if(uriResourceFunction.getParameters().size()==0){
+//                            query=demoEdmProviderForAllForAction.QUERY;
+//                        }else{
+//                            final UriParameter parameterTop=uriResourceFunction.getParameters().get(0);
+//                            limit=Integer.parseInt(parameterTop.getText());
+//                            query=demoEdmProviderForAllForAction.QUERY+" "+demoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
+//                        }
+//                        //if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("product")) {
+//                            entityCollectionget = AllProducts(query);
+////                        }else
+////                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("category")) {
+////                            entityCollectionget = AllCategory(query);
+////                        }
+//                        return  entityCollectionget;
+//
+//                    }catch (Exception e){
+//                        throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
+//                    }
+//                }
+//            }else {
+//                throw new ODataApplicationException("Function not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
+//                        Locale.ROOT);
+//            }
+//        }
         return null;
     }
 
@@ -288,7 +316,7 @@ public class StorageForAction {
         return false;
     }
 
-    private List<Entity> initProductSampleData(String query) {
+    private List<Entity> initProductSampleData(String query,FullQualifiedName et_Name) {
 
 
         // Sql Connection
@@ -319,11 +347,19 @@ public class StorageForAction {
 
                 for (int i=1;i<=columnCount;i++){
                 columns.put(metaData.getColumnLabel(i),rs.getObject(i));
-                entity.addProperty(new Property(null, metaData.getColumnLabel(i), ValueType.PRIMITIVE,rs.getObject(i)));
-                }
-                entity.setType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString());
-                entity.setId(createId(entity, "ID"));
+                    if(!metaData.getColumnLabel(1).toLowerCase().contains("count")){
+                        entity.addProperty(new Property(null, metaData.getColumnLabel(i), ValueType.PRIMITIVE,rs.getObject(i)));
+                    }else
+                    {
+                        entity.addProperty(new Property(null, "Count", ValueType.PRIMITIVE,rs.getObject(i)));
+                    }
 
+                }
+
+                if(!metaData.getColumnLabel(1).toLowerCase().contains("count")) {
+                    entity.setType(et_Name.getFullQualifiedNameAsString());
+                    entity.setId(createId(entity, "ID"));
+                }
                 productList.add(entity);
             }
 
@@ -568,12 +604,12 @@ public class StorageForAction {
         return false;
     }
 
-    public EntityCollection AllProducts(String query) {
+    public EntityCollection AllProducts(String query, FullQualifiedName et_Name) {
         if(!productList.isEmpty())
         {
             productList.clear();
         }
-        productList=initProductSampleData(query);
+        productList=initProductSampleData(query,et_Name);
         return getEntityCollection(productList);
     }
 
