@@ -42,5 +42,37 @@
       "PropertiesType":  "int"
     }
   ]
+},{
+  "EntityType": "Supplier",
+  "EntitySet": "Suppliers",
+  "Properties":[
+    {
+      "PropertiesName":  "ID",
+      "PropertiesType":  "int"
+    },
+    {
+      "PropertiesName":  "Name",
+      "PropertiesType":  "String"
+    },
+    {
+      "PropertiesName":  "Place",
+      "PropertiesType":  "String"
+    }]
+},{
+  "EntityType": "SampleSupplier",
+  "EntitySet": "SampleSuppliers",
+  "Properties":[
+    {
+      "PropertiesName":  "ID",
+      "PropertiesType":  "int"
+    },
+    {
+      "PropertiesName":  "Name",
+      "PropertiesType":  "String"
+    },
+    {
+      "PropertiesName":  "Place",
+      "PropertiesType":  "String"
+    }]
 }
 ]

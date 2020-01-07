@@ -1,7 +1,7 @@
 [{
   "FUNCTION_NAME": "GetAllProducts",
   "PARAMETER_AMOUNT": " ",
-  "QUERY": "SELECT * FROM studentapplication.product ",
+  "QUERY": "select ID, Name,Description from product",
   "SET_RETURN_TYPE": "Product",
   "SET_COLLECTION": true,
   "SET_BOUND": false
@@ -44,5 +44,21 @@
     "QUERY": "SELECT count(*) FROM studentapplication.product ",
     "SET_RETURN_TYPE": "CountArray",
     "SET_COLLECTION": false,
+    "SET_BOUND": false
+  },
+  {
+    "FUNCTION_NAME": "GetTopsamplesupplier",
+    "PARAMETER_AMOUNT": " ",
+    "QUERY": "SELECT * FROM studentapplication.samplesupplier ",
+    "SET_RETURN_TYPE": "SampleSupplier",
+    "SET_COLLECTION": true,
+    "SET_BOUND": false
+  },
+  {
+    "FUNCTION_NAME": "Getsupplier",
+    "PARAMETER_AMOUNT": " ",
+    "QUERY": "SELECT * FROM studentapplication.supplier ",
+    "SET_RETURN_TYPE": "Supplier",
+    "SET_COLLECTION": true,
     "SET_BOUND": false
   }]

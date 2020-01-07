@@ -5,18 +5,38 @@ import java.util.List;
 public class EntityListClass {
    public String EntityTypeName;
    public String EntitySet;
-   public List<PropertyList> propertyList;
-   public String NavigationProperty ;
+   //public List<PropertyList> propertyList;
+    public String PropertiesName;
+    public String PropertiesType;
+
+    public EntityListClass(String entityTypeName, String entitySet, String propertiesName, String propertiesType, String navigationProperty) {
+        EntityTypeName = entityTypeName;
+        EntitySet = entitySet;
+        PropertiesName = propertiesName;
+        PropertiesType = propertiesType;
+        NavigationProperty = navigationProperty;
+    }
+
+    public String getPropertiesName() {
+        return PropertiesName;
+    }
+
+    public void setPropertiesName(String propertiesName) {
+        PropertiesName = propertiesName;
+    }
+
+    public String getPropertiesType() {
+        return PropertiesType;
+    }
+
+    public void setPropertiesType(String propertiesType) {
+        PropertiesType = propertiesType;
+    }
+
+    public String NavigationProperty ;
 
     public String getEntityTypeName() {
         return EntityTypeName;
-    }
-
-    public EntityListClass(String entityTypeName, String entitySet, List<PropertyList> propertyList, String navigationProperty) {
-        EntityTypeName = entityTypeName;
-        EntitySet = entitySet;
-        this.propertyList = propertyList;
-        NavigationProperty = navigationProperty;
     }
 
     public String getNavigationProperty() {
@@ -37,14 +57,6 @@ public class EntityListClass {
 
     public void setEntitySet(String entitySet) {
         EntitySet = entitySet;
-    }
-
-    public List<PropertyList> getPropertyList() {
-        return propertyList;
-    }
-
-    public void setPropertyList(List<PropertyList> propertyList) {
-        this.propertyList = propertyList;
     }
 
     public EntityListClass() {

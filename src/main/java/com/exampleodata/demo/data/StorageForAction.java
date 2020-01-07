@@ -35,9 +35,6 @@ public class StorageForAction {
 
         productList = new ArrayList<Entity>();
         categoryList = new ArrayList<Entity>();
-
-        //initProductSampleData();
-        //initCategorySampleData();
     }
 
     /* PUBLIC FACADE */
@@ -65,9 +62,6 @@ public class StorageForAction {
                         String query=null;
                         EntityCollection entityCollectionget=null;
                          int limit;
-//                        demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
-//                        demoEdmProviderForAllForAction.PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
-//                        demoEdmProviderForAllForAction.SET_RETURN_TYPE=new FullQualifiedName(DemoEdmProviderForAllForAction.NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
                         if(uriResourceFunction.getParameters().size()==0){
                             query=functionEntry.getValue().getQUERY();
                         }else{
@@ -85,46 +79,6 @@ public class StorageForAction {
                     }
             }
         }
-
-//        for(int i=0;i<functionLinkedList.size();i++) {
-//            HashMap hm = (HashMap) functionLinkedList.get(i);
-//            if(hm.containsKey("FUNCTION_NAME")){
-//                demoEdmProviderForAllForAction.FUNCTION_NAME = (String) hm.get("FUNCTION_NAME");
-//                  if(demoEdmProviderForAllForAction.FUNCTION_NAME.equals(uriResourceFunction.getFunctionImport().getName())) {
-//                    String query=null;
-//                    EntityCollection entityCollectionget=null;
-//                    int limit;
-//
-//                    try
-//                    {
-//
-//                        demoEdmProviderForAllForAction.QUERY=(String) hm.get("QUERY");
-//                        demoEdmProviderForAllForAction.PARAMETER_AMOUNT=(String) hm.get("PARAMETER_AMOUNT");
-//                        demoEdmProviderForAllForAction.SET_RETURN_TYPE=new FullQualifiedName(DemoEdmProviderForAllForAction.NAMESPACE, (String) hm.get("SET_RETURN_TYPE"));
-//                        if(uriResourceFunction.getParameters().size()==0){
-//                            query=demoEdmProviderForAllForAction.QUERY;
-//                        }else{
-//                            final UriParameter parameterTop=uriResourceFunction.getParameters().get(0);
-//                            limit=Integer.parseInt(parameterTop.getText());
-//                            query=demoEdmProviderForAllForAction.QUERY+" "+demoEdmProviderForAllForAction.PARAMETER_AMOUNT+" "+limit;
-//                        }
-//                        //if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("product")) {
-//                            entityCollectionget = AllProducts(query);
-////                        }else
-////                        if(demoEdmProviderForAllForAction.SET_RETURN_TYPE.getName().equalsIgnoreCase("category")) {
-////                            entityCollectionget = AllCategory(query);
-////                        }
-//                        return  entityCollectionget;
-//
-//                    }catch (Exception e){
-//                        throw new ODataApplicationException("Exception ",HttpStatusCode.BAD_REQUEST.getStatusCode(),Locale.ENGLISH);
-//                    }
-//                }
-//            }else {
-//                throw new ODataApplicationException("Function not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-//                        Locale.ROOT);
-//            }
-//        }
         return null;
     }
 
@@ -173,24 +127,24 @@ public class StorageForAction {
 
     public EntityCollection readEntitySetData(EdmEntitySet edmEntitySet) throws ODataApplicationException {
 
-        if (edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME)) {
-            productList=initProductSampleData();
-            return getEntityCollection(productList);
-        } else if(edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME)) {
-            return getEntityCollection(categoryList);
-        }
+//        if (edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME)) {
+//            productList=initProductSampleData();
+//            return getEntityCollection(productList);
+//        } else if(edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME)) {
+//            return getEntityCollection(categoryList);
+//        }
 
         return null;
     }
 
     public EntityCollection readEntitySetData(String edmEntityTypeName) throws ODataApplicationException {
 
-        if (edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME)) {
-            productList=initProductSampleData();
-            return getEntityCollection(productList);
-        } else if(edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_NAME)) {
-            return getEntityCollection(categoryList);
-        }
+//        if (edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME)) {
+//            productList=initProductSampleData();
+//            return getEntityCollection(productList);
+//        } else if(edmEntityTypeName.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_NAME)) {
+//            return getEntityCollection(categoryList);
+//        }
 
         return null;
     }
@@ -198,11 +152,11 @@ public class StorageForAction {
 
     public Entity readEntityData(String entityTypeName) {
 
-        if (entityTypeName.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME)) {
-            return  getEntityCollection(productList).getEntities().get(0);
-        } else if(entityTypeName.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_NAME)) {
-            return getEntityCollection(categoryList).getEntities().get(0);
-        }
+//        if (entityTypeName.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_NAME)) {
+//            return  getEntityCollection(productList).getEntities().get(0);
+//        } else if(entityTypeName.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_NAME)) {
+//            return getEntityCollection(categoryList).getEntities().get(0);
+//        }
 
         return null;
 
@@ -212,12 +166,12 @@ public class StorageForAction {
             throws ODataApplicationException {
 
         EdmEntityType edmEntityType = edmEntitySet.getEntityType();
-
-        if (edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME)) {
-            return getEntity(edmEntityType, keyParams, productList);
-        } else if(edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME)) {
-            return getEntity(edmEntityType, keyParams, categoryList);
-        }
+//
+//        if (edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME)) {
+//            return getEntity(edmEntityType, keyParams, productList);
+//        } else if(edmEntitySet.getName().equals(DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME)) {
+//            return getEntity(edmEntityType, keyParams, categoryList);
+//        }
 
         return null;
     }
@@ -244,32 +198,32 @@ public class StorageForAction {
         FullQualifiedName relatedEntityFqn = targetEntityType.getFullQualifiedName();
         String sourceEntityFqn = sourceEntity.getType();
 
-        if (sourceEntityFqn.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN)) {
-            // relation Products->Category (result all categories)
-            int productID = (Integer) sourceEntity.getProperty("ID").getValue();
-            if (productID == 0 || productID == 1) {
-                navigationTargetEntityCollection.getEntities().add(categoryList.get(0));
-            } else if (productID == 2 || productID == 3) {
-                navigationTargetEntityCollection.getEntities().add(categoryList.get(1));
-            } else if (productID == 4 || productID == 5 || productID == 6) {
-                navigationTargetEntityCollection.getEntities().add(categoryList.get(2));
-            }
-        } else if (sourceEntityFqn.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString())
-                && relatedEntityFqn.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN)) {
-            // relation Category->Products (result all products)
-            int categoryID = (Integer) sourceEntity.getProperty("ID").getValue();
-            if (categoryID == 0) {
-                // the first 2 products are notebooks
-                navigationTargetEntityCollection.getEntities().addAll(productList.subList(0, 3));
-            } else if (categoryID == 1) {
-                // the next 2 products are organizers
-                navigationTargetEntityCollection.getEntities().addAll(productList.subList(1, 4));
-            } else if (categoryID == 2) {
-                // the first 2 products are monitors
-                navigationTargetEntityCollection.getEntities().addAll(productList.subList(2, 6));
-            }
-        }
+//        if (sourceEntityFqn.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString())
+//                && relatedEntityFqn.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN)) {
+//            // relation Products->Category (result all categories)
+//            int productID = (Integer) sourceEntity.getProperty("ID").getValue();
+//            if (productID == 0 || productID == 1) {
+//                navigationTargetEntityCollection.getEntities().add(categoryList.get(0));
+//            } else if (productID == 2 || productID == 3) {
+//                navigationTargetEntityCollection.getEntities().add(categoryList.get(1));
+//            } else if (productID == 4 || productID == 5 || productID == 6) {
+//                navigationTargetEntityCollection.getEntities().add(categoryList.get(2));
+//            }
+//        } else if (sourceEntityFqn.equals(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString())
+//                && relatedEntityFqn.equals(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN)) {
+//            // relation Category->Products (result all products)
+//            int categoryID = (Integer) sourceEntity.getProperty("ID").getValue();
+//            if (categoryID == 0) {
+//                // the first 2 products are notebooks
+//                navigationTargetEntityCollection.getEntities().addAll(productList.subList(0, 3));
+//            } else if (categoryID == 1) {
+//                // the next 2 products are organizers
+//                navigationTargetEntityCollection.getEntities().addAll(productList.subList(1, 4));
+//            } else if (categoryID == 2) {
+//                // the first 2 products are monitors
+//                navigationTargetEntityCollection.getEntities().addAll(productList.subList(2, 6));
+//            }
+//        }
 
         return navigationTargetEntityCollection;
     }
@@ -409,7 +363,7 @@ public class StorageForAction {
                 entity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, Name));
 
 
-                entity.setType(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString());
+                //entity.setType(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString());
                 entity.setId(createId(entity, "ID"));
 
                 categoryList.add(entity);
@@ -465,7 +419,7 @@ public class StorageForAction {
                 entity.addProperty(new Property(null,"Price",ValueType.PRIMITIVE,Price));
 
 
-                entity.setType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString());
+               // entity.setType(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString());
                 entity.setId(createId(entity, "ID"));
 
                 productList.add(entity);
@@ -521,7 +475,7 @@ public class StorageForAction {
                 entity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, Name));
 
 
-                entity.setType(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString());
+                //entity.setType(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString());
                 entity.setId(createId(entity, "ID"));
 
                 categoryList.add(entity);
@@ -556,11 +510,11 @@ public class StorageForAction {
     }
 
     private String getEntitySetName(Entity entity) {
-        if(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
-            return DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME;
-        } else if(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
-            return DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME;
-        }
+//        if(DemoEdmProviderForAllForAction.ET_CATEGORY_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
+//            return DemoEdmProviderForAllForAction.ES_CATEGORIES_NAME;
+//        } else if(DemoEdmProviderForAllForAction.ET_PRODUCT_FQN.getFullQualifiedNameAsString().equals(entity.getType())) {
+//            return DemoEdmProviderForAllForAction.ES_PRODUCTS_NAME;
+//        }
         return entity.getType();
     }
 
