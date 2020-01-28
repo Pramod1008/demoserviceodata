@@ -1,15 +1,15 @@
 [{
   "FUNCTION_NAME": "GetAllProducts",
   "PARAMETER_AMOUNT": " ",
-  "QUERY": "select ID, Name,Description from product",
+  "QUERY": "from product",
   "SET_RETURN_TYPE": "Product",
   "SET_COLLECTION": true,
   "SET_BOUND": false
   },
   {
     "FUNCTION_NAME": "GetTopProducts",
-    "PARAMETER_AMOUNT": "Limit",
-    "QUERY": "SELECT * FROM studentapplication.product ",
+    "PARAMETER_AMOUNT": " ",
+    "QUERY": " * from Product p join Category c",
     "SET_RETURN_TYPE": "Product",
     "SET_COLLECTION": true,
     "SET_BOUND": false
@@ -17,7 +17,7 @@
   {
     "FUNCTION_NAME": "GetAllCategories",
     "PARAMETER_AMOUNT": " ",
-    "QUERY": "SELECT * FROM studentapplication.category ",
+    "QUERY": "FROM category ",
     "SET_RETURN_TYPE": "Category",
     "SET_COLLECTION": true,
     "SET_BOUND": false
@@ -25,7 +25,7 @@
   {
     "FUNCTION_NAME": "GetTopCategories",
     "PARAMETER_AMOUNT": "Limit",
-    "QUERY": "SELECT * FROM studentapplication.category ",
+    "QUERY": "FROM category ",
     "SET_RETURN_TYPE": "Category",
     "SET_COLLECTION": true,
     "SET_BOUND": false
@@ -49,7 +49,7 @@
   {
     "FUNCTION_NAME": "GetTopsamplesupplier",
     "PARAMETER_AMOUNT": " ",
-    "QUERY": "SELECT * FROM studentapplication.samplesupplier ",
+    "QUERY": "FROM studentapplication.samplesupplier ",
     "SET_RETURN_TYPE": "SampleSupplier",
     "SET_COLLECTION": true,
     "SET_BOUND": false
@@ -57,7 +57,7 @@
   {
     "FUNCTION_NAME": "Getsupplier",
     "PARAMETER_AMOUNT": " ",
-    "QUERY": "SELECT * FROM studentapplication.supplier ",
+    "QUERY": "FROM studentapplication.supplier ",
     "SET_RETURN_TYPE": "Supplier",
     "SET_COLLECTION": true,
     "SET_BOUND": false

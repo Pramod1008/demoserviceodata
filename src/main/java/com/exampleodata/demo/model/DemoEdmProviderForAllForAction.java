@@ -6,6 +6,8 @@ import java.util.*;
 
 
 import com.exampleodata.demo.utils.DataUtils;
+import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
@@ -39,23 +41,12 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
     public static final String CONTAINER_NAME = "Container";
     public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
 
-    // Entity Types Names
-//    public static final String ET_PRODUCT_NAME = "Product";
-//    public static final FullQualifiedName ET_PRODUCT_FQN = new FullQualifiedName(NAMESPACE, ET_PRODUCT_NAME);
-
     public String ET_NAME = null;
     public FullQualifiedName ET_FQN =null;
 
     public String NV_NAME=null;
     public FullQualifiedName NV_NAME_FQN=null;
     public String NV_BIND_TARGET=null;
-
-//    public static final String ET_CATEGORY_NAME = "Category";
-//    public static final FullQualifiedName ET_CATEGORY_FQN = new FullQualifiedName(NAMESPACE, ET_CATEGORY_NAME);
-
-    // Entity Set Names
-//    public static final String ES_PRODUCTS_NAME = "Products";
-//    public static final String ES_CATEGORIES_NAME = "Categories";
 
     public String ES_NAME = null;
 
@@ -66,7 +57,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         getEntityList=getEntityList();
     }
 
-    private LinkedList getEntityList() throws IOException, ParseException {
+    public LinkedList getEntityList() throws IOException, ParseException {
         JSONParser jsonParser=new JSONParser();
         Object obj= jsonParser.parse(new FileReader("D:\\Pramod\\Document\\git\\demoserviceodata\\src\\main\\java\\com\\exampleodata\\demo\\data\\EntitySet.json"));
 
@@ -313,6 +304,109 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
         return null;
     }
 
+    public CsdlEntityType getNewEntityType(FullQualifiedName entityTypeName,EntityCollection entityCollection) {
+
+        // this method is called for each EntityType that are configured in the Schema
+        CsdlEntityType entityType = null;
+        List<CsdlProperty> csdlPropertyList =null;
+
+        List<String> listProperties=new ArrayList<>();
+        int len=entityCollection.getEntities().get(0).getProperties().size();
+        for(int k=0 ;k<len;k++)
+        {
+            listProperties.add(entityCollection.getEntities().get(0).getProperties().get(k).getName());
+        }
+        LOG.info(listProperties.toString());
+
+        int localSet=0;
+
+        for(int i=0;i<getEntityList.size();i++) {
+            HashMap hm = (HashMap) getEntityList.get(i);
+            if(hm.containsKey("EntityType") && entityTypeName.getName().equals(hm.get("EntityType"))){
+                LOG.info("Create EntityType"+entityTypeName);
+                csdlPropertyList=new ArrayList<>();
+                if(hm.containsKey("Properties"))
+                {
+                    JSONArray jsonArray= (JSONArray) hm.get("Properties");
+                    int length = jsonArray.size();
+
+                    CsdlProperty csdlProperty =null;
+                    // create PropertyRef for Key element
+                    CsdlPropertyRef propertyRef = null;
+
+                    for (int j =0; j< length; j++) {
+                        JSONObject jsonObject = (JSONObject) jsonArray.get(j);
+                        Set s = jsonObject.entrySet();
+                        Iterator iterMap = s.iterator();
+                        csdlProperty=new CsdlProperty();
+                        HashMap hmList = new HashMap();
+                        while(iterMap.hasNext()) {
+                            Map.Entry me = (Map.Entry) iterMap.next();
+                            hmList.put(me.getKey(), me.getValue());
+                            LOG.info(hmList.keySet().toString());
+                            LOG.info(hmList.values().toString());
+                            LOG.info(me.getKey().equals("PropertiesName") +" " +listProperties.contains(hmList.get("PropertiesName")));
+                            if (me.getKey().equals("PropertiesName") && listProperties.contains(hmList.get("PropertiesName")))
+                            {
+                                if(me.getValue().toString().equalsIgnoreCase("ID"))
+                                {
+                                    localSet=1;
+                                }
+                                csdlProperty.setName(me.getValue().toString());
+                                LOG.info(hmList.get("PropertiesType").toString());
+                                 for (Map.Entry<String,FullQualifiedName> entry: DataUtils.getDataTypeObj().entrySet()) {
+                                    if(hmList.get("PropertiesType").toString().toLowerCase().contains(entry.getKey())){
+                                        csdlProperty.setType(entry.getValue());
+                                    }
+                                }
+                                csdlPropertyList.add(csdlProperty);
+                            }
+                        }
+
+                    }
+                    propertyRef = new CsdlPropertyRef();
+                    if(localSet==1)
+                    {
+                        propertyRef.setName("ID");
+                    }else
+                    {
+                        propertyRef.setName("0");
+                    }
+
+
+                    List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
+                    if(hm.containsKey("NavigationProperty"))
+                    {
+                        NV_NAME= (String) hm.get("NavigationProperty");
+                        NV_NAME_FQN=new FullQualifiedName(NAMESPACE,NV_NAME);
+
+                        LOG.info("Entity Name "+entityTypeName+" NV Name "+NV_NAME+" Set Partner "+entityTypeName.getName());
+
+                        // navigation property: many-to-one, null not allowed (product must have a category)
+                        CsdlNavigationProperty navProp = new CsdlNavigationProperty().setName(NV_NAME)
+                                .setType(NV_NAME_FQN).setNullable(true)
+                                .setPartner(entityTypeName.getName());
+                        navPropList.add(navProp);
+
+                    }
+
+                    entityType = new CsdlEntityType();
+                    entityType.setName(entityTypeName.getName());
+                    entityType.setProperties(csdlPropertyList);
+
+                    if(!propertyRef.getName().equalsIgnoreCase("0"))
+                        entityType.setKey(Arrays.asList(propertyRef));
+
+                    if(navPropList.size()!=0)
+                        entityType.setNavigationProperties(navPropList);
+
+                    return entityType;
+                }
+            }
+        }
+
+        return null;
+    }
 
     @Override
     public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String entitySetName) {
@@ -362,7 +456,7 @@ public class DemoEdmProviderForAllForAction extends CsdlAbstractEdmProvider {
 
     }
 
-    @Override
+     @Override
     public List<CsdlSchema> getSchemas() {
         try {
             // create Schema

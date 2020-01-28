@@ -1,20 +1,14 @@
 package com.exampleodata.demo.model;
 
-
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import com.exampleodata.demo.data.StorageForAction;
 import com.exampleodata.demo.data.UtilForAction;
 import org.apache.olingo.commons.api.Constants;
-import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.data.Link;
+import org.apache.olingo.commons.api.data.*;
 import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -32,7 +26,9 @@ import org.apache.olingo.server.api.uri.*;
 import org.apache.olingo.server.api.uri.queryoption.*;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
+import org.hibernate.type.EntityType;
 import org.json.simple.parser.ParseException;
+
 
 
 public class DemoEntityCollectionProcessorForAction implements EntityCollectionProcessor {
@@ -90,7 +86,6 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
 
         UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
         EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-
 
         EntityCollection entityCollection = storage.readEntitySetData(edmEntitySet);
 
@@ -150,7 +145,7 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
 
 
         final UriResource firstSegment = uriInfo.getUriResourceParts().get(0);
-
+        EdmEntitySet responseEdmEntitySet = null;
         if(!(firstSegment instanceof UriResourceFunction)) {
             throw new ODataApplicationException("Not implemented", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                     Locale.ENGLISH);
@@ -159,19 +154,153 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
         final UriResourceFunction uriResourceFunction = (UriResourceFunction) firstSegment;
         final EntityCollection entityCol = storage.readFunctionImportCollection(uriResourceFunction, serviceMetadata);
 
-
         final EdmEntityType edmEntityType = (EdmEntityType) uriResourceFunction.getFunction().getReturnType().getType();
-        final ContextURL contextURL = ContextURL.with().asCollection().type(edmEntityType).build();
-        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().contextURL(contextURL).build();
+
+        for(EdmEntitySet entitySet : serviceMetadata.getEdm().getEntityContainer().getEntitySets()){
+            if(edmEntityType.getName().equals(entitySet.getEntityType().getName())){
+               // responseEdmEntityType = entitySet.getEntityType();
+                responseEdmEntitySet = entitySet;
+                break;
+            }
+        }
+
+        EdmEntityType edmEntityType1 = responseEdmEntitySet.getEntityType();
+        ExpandOption expandOption=uriInfo.getExpandOption();
+        SelectOption selectOption= uriInfo.getSelectOption();
+
+        String selectList = odata.createUriHelper().buildContextURLSelectList(edmEntityType1, expandOption, selectOption);
+        final ContextURL contextURL= ContextURL.with().entitySet(responseEdmEntitySet).selectList(selectList).build();
+
+
+        //final EntityType edmEntityTypeoption= (EntityType) getEntityType(entityCol,edmEntityType);
+        //final EdmEntityType edmEntityTypeOp = (EdmEntityType) edmEntityTypeoption;
+       // final ContextURL contextURL = ContextURL.with().asCollection().type(edmEntityType).build();
+        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
+                .contextURL(contextURL)
+                .select(selectOption)
+                .expand(expandOption)
+                .build();
         final ODataSerializer serializer = odata.createSerializer(responseFormat);
-        final SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, entityCol,
+        final SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType1, entityCol,
                 opts);
-
-
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
     }
+
+    private void readExpand(ExpandOption expandOption, UriInfo uriInfo, EntityCollection entityCol) {
+
+        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+
+       // UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0);
+        EdmEntitySet edmEntitySet = (EdmEntitySet) entityCol.getEntities().get(0);
+
+        EdmNavigationProperty edmNavigationProperty = null;
+        ExpandItem expandItem = expandOption.getExpandItems().get(0);
+        if(expandItem.isStar()) {
+            List<EdmNavigationPropertyBinding> bindings = edmEntitySet.getNavigationPropertyBindings();
+            // we know that there are navigation bindings
+            // however normally in this case a check if navigation bindings exists is done
+            if(!bindings.isEmpty()) {
+                // can in our case only be 'Category' or 'Products', so we can take the first
+                EdmNavigationPropertyBinding binding = bindings.get(0);
+                EdmElement property = edmEntitySet.getEntityType().getProperty(binding.getPath());
+                // we don't need to handle error cases, as it is done in the Olingo library
+                if(property instanceof EdmNavigationProperty) {
+                    edmNavigationProperty = (EdmNavigationProperty) property;
+                }
+            }
+        } else {
+
+            UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
+
+            if(uriResource instanceof UriResourceNavigation) {
+                edmNavigationProperty = ((UriResourceNavigation) uriResource).getProperty();
+            }
+        }
+
+        if(edmNavigationProperty != null) {
+            String navPropName = edmNavigationProperty.getName();
+            EdmEntityType expandEdmEntityType = edmNavigationProperty.getType();
+
+            List<Entity> entityList = entityCol.getEntities();
+            for (Entity entity : entityList) {
+                Link link = new Link();
+                link.setTitle(navPropName);
+                link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
+                link.setRel(Constants.NS_ASSOCIATION_LINK_REL + navPropName);
+
+                if (edmNavigationProperty.isCollection()) {
+                    EntityCollection expandEntityCollection = storage.getRelatedEntityCollection(entity, expandEdmEntityType);
+                    link.setInlineEntitySet(expandEntityCollection);
+                    link.setHref(expandEntityCollection.getId().toASCIIString());
+                } else {
+                    Entity expandEntity = storage.getRelatedEntity(entity, expandEdmEntityType);
+                    link.setInlineEntity(expandEntity);
+                    link.setHref(expandEntity.getId().toASCIIString());
+                }
+
+                // set the link - containing the expanded data - to the current entity
+                entity.getNavigationLinks().add(link);
+            }
+        }
+
+    }
+
+    private EdmEntityType getEntityType(EntityCollection entityCol, EdmEntityType edmEntityType) throws IOException, ParseException {
+        int len=entityCol.getEntities().get(0).getProperties().size();
+
+          //int lenP=entityCol.getEntities().get(0).getProperties().get(0).getName().length();
+          int edmPLen=edmEntityType.getPropertyNames().size();
+          if(len==edmPLen)
+          {
+              return edmEntityType;
+          }
+          else
+          {
+              DemoEdmProviderForAllForAction provider=new DemoEdmProviderForAllForAction();
+              CsdlEntityType edmnew=provider.getNewEntityType(edmEntityType.getFullQualifiedName(),entityCol);
+                return (EdmEntityType) edmnew;
+          }
+    }
+
+    private Object getSelectOption(EntityCollection entityCol) {
+        List<String> selectItems=new ArrayList<>();
+        List<Property> oldProperties=entityCol.getEntities().get(0).getProperties();
+         int len=entityCol.getEntities().get(0).getProperties().size();
+        for(int i=0 ;i<len;i++)
+        {
+           selectItems.add(entityCol.getEntities().get(0).getProperties().get(i).getName());
+        }
+        return selectItems;
+    }
+
+//    private  CsdlEntityType getSelectOption(EntityCollection entityCol,EdmEntityType edmEntityType) {
+//
+//        List<Property> oldProperties=entityCol.getEntities().get(0).getProperties();
+//        CsdlEntityType entityType = null;
+//        List<CsdlProperty> csdlPropertyList =null;
+//        CsdlProperty csdlProperty=new CsdlProperty();
+//
+//        List<String> list=new ArrayList();
+//        HashMap<String,String> listProperties=new HashMap<String, String>();
+//        int len=entityCol.getEntities().get(0).getProperties().size();
+//        for(int i=0 ;i<len;i++)
+//        {
+//            listProperties.put(entityCol.getEntities().get(0).getProperties().get(i).getName(),entityCol.getEntities().get(0).getProperties().get(i).getType());
+//            csdlProperty.setName(String.valueOf(listProperties.keySet()));
+//            csdlProperty.setType(String.valueOf(listProperties.values()));
+//            csdlPropertyList.add(csdlProperty);
+//        }
+//        list.addAll(listProperties.keySet());
+//
+//        entityType = new CsdlEntityType();
+//        entityType.setName(edmEntityType.getName());
+//        entityType.setProperties(csdlPropertyList);
+//
+//        return entityType;
+//
+//    }
 
     private void readEntityCollectionInternal(ODataRequest request, ODataResponse response, UriInfo uriInfo,
                                               ContentType responseFormat) throws ODataApplicationException, SerializerException {

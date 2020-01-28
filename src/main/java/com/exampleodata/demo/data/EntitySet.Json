@@ -74,5 +74,32 @@
       "PropertiesName":  "Place",
       "PropertiesType":  "String"
     }]
+},  {
+  "EntityType": "ProductCategory",
+  "EntitySet": "ProductCategories",
+  "Properties":[
+    {
+      "PropertiesName":  "ID",
+      "PropertiesType":  "int"
+    },
+    {
+      "PropertiesName":  "Name",
+      "PropertiesType":  "String"
+    },
+    {
+      "PropertiesName":  "Description",
+      "PropertiesType":  "String"
+    },
+    {
+      "PropertiesName":  "Price",
+      "PropertiesType":  "Double"
+    }, {
+      "PropertiesName":  "ID",
+      "PropertiesType":  "int"
+    },
+    {
+      "PropertiesName":  "Name",
+      "PropertiesType":  "String"
+    }]
 }
 ]
