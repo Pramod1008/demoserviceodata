@@ -8,8 +8,8 @@
   },
   {
     "FUNCTION_NAME": "GetTopProducts",
-    "PARAMETER_AMOUNT": " ",
-    "QUERY": " * from Product p join Category c",
+    "PARAMETER_AMOUNT": "Limit",
+    "QUERY": " from Product",
     "SET_RETURN_TYPE": "Product",
     "SET_COLLECTION": true,
     "SET_BOUND": false
@@ -61,4 +61,19 @@
     "SET_RETURN_TYPE": "Supplier",
     "SET_COLLECTION": true,
     "SET_BOUND": false
-  }]
+  },{
+  "FUNCTION_NAME": "GetProductWithCategory",
+  "PARAMETER_AMOUNT": " ",
+  "QUERY": " from Product p join category c",
+  "SET_RETURN_TYPE": "Product",
+  "SET_COLLECTION": true,
+  "SET_BOUND": false
+},{
+  "FUNCTION_NAME": "GetCategoryWithProduct",
+  "PARAMETER_AMOUNT": " ",
+  "QUERY": " from category c join product p",
+  "SET_RETURN_TYPE": "Category",
+  "SET_COLLECTION": true,
+  "SET_BOUND": false
+}
+]

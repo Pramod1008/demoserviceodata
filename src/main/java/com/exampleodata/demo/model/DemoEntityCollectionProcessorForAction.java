@@ -158,7 +158,6 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
 
         for(EdmEntitySet entitySet : serviceMetadata.getEdm().getEntityContainer().getEntitySets()){
             if(edmEntityType.getName().equals(entitySet.getEntityType().getName())){
-               // responseEdmEntityType = entitySet.getEntityType();
                 responseEdmEntitySet = entitySet;
                 break;
             }
@@ -171,10 +170,6 @@ public class DemoEntityCollectionProcessorForAction implements EntityCollectionP
         String selectList = odata.createUriHelper().buildContextURLSelectList(edmEntityType1, expandOption, selectOption);
         final ContextURL contextURL= ContextURL.with().entitySet(responseEdmEntitySet).selectList(selectList).build();
 
-
-        //final EntityType edmEntityTypeoption= (EntityType) getEntityType(entityCol,edmEntityType);
-        //final EdmEntityType edmEntityTypeOp = (EdmEntityType) edmEntityTypeoption;
-       // final ContextURL contextURL = ContextURL.with().asCollection().type(edmEntityType).build();
         EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with()
                 .contextURL(contextURL)
                 .select(selectOption)
